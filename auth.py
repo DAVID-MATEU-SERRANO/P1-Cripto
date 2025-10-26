@@ -2,10 +2,12 @@
 import os
 import hashlib
 import base64
+from time import sleep
 import tkinter as tk
 from tkinter import font as tkfont
-from json_functions import load_data, store_data
+from utility_functions import load_data, store_data, type_text
 import re
+from main_program import show_secondary_menu
 
 DEFAULT_ITERATIONS = 200_000
 USERS_FILE = "Passwords/users.json"
@@ -104,7 +106,7 @@ def show_login_window():
     tk.Button(
             root_login,
             text="INICIAR SESIÓN",
-            command=lambda: [login_user(username_entry.get(), password_entry.get(), terminal)],
+            command=lambda: [login_user(username_entry.get(), password_entry.get(), terminal, root_login)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -207,7 +209,7 @@ def show_register_window():
 
     # --- Área tipo terminal ---
     terminal = tk.Text(root_register, width=70, bg="#0e0e0e", fg="#29FFF4",
-                       insertbackground="white", font=("Consolas", 11), relief="flat", state="disabled")
+                       insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
     type_text(terminal, "Bienvenido a CryptoRacers\nIntroduzca un usuario y una contraseña :)")
 
@@ -216,7 +218,6 @@ def show_register_window():
 
 ### REGISTER AND LOGIN FUNCTIONS ###
 def register_user(username: str, password: str, terminal):
-    terminal.config(state="normal")
     terminal.delete("1.0", tk.END)
     if password == "" or username == "":
         type_text(terminal, "Complete todos los campos por favor\n")
@@ -226,21 +227,31 @@ def register_user(username: str, password: str, terminal):
         type_text(terminal, "El usuario ya existe.\n")
         return
     
+    '''    
     regex = re.compile(r'^(?=.{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
     if not regex.match(password):
         type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) \ny tener una longitud mínima de 8")
         return 
+    '''
 
     salt_b64, hash_b64 = hash_password(password)
 
 
-    users = load_data(USERS_FILE)
-    users[username] = {
+    users_auth = load_data(USERS_FILE)
+    users_auth[username] = {
         "salt": salt_b64,
         "hash": hash_b64
     }
+    USER_DATA_PATH = f"User_data/{username}_data.json"
+    user_data = load_data(USER_DATA_PATH)
+    user_data["username"] = username
+    user_data["garage"] = []
+    user_data["points"] = 200
+
     
-    store_data(users, USERS_FILE)
+    store_data(users_auth, USERS_FILE)
+    store_data(user_data, USER_DATA_PATH)
+
     type_text(terminal, (
     f"Salt {salt_b64} generado y aplicado...\n"
     "Aplicado pepper secreto...\n"
@@ -249,8 +260,7 @@ def register_user(username: str, password: str, terminal):
     "Datos registrados correctamente!\n"))
 
 
-def login_user(username: str, password: str, terminal):
-    terminal.config(state="normal")
+def login_user(username: str, password: str, terminal, root):
     terminal.delete("1.0", tk.END)
     if password == "" or username == "":
         type_text(terminal, "Complete todos los campos por favor\n")
@@ -269,10 +279,12 @@ def login_user(username: str, password: str, terminal):
     _, computed_hash = hash_password(password, salt)
 
     if computed_hash == stored_hash:
-        type_text(terminal, "Comparando hashes...\nInicio de sesión exitoso!\n")
+        USER_DATA_PATH = f"User_data/{username}_data.json"
+        root.destroy()
+        show_secondary_menu(USER_DATA_PATH)
         return
     else:
-        type_text(terminal, "Comparando hashes...\nContraseña incorrecta.\nInténtelo de nuevo :(\n")
+        type_text(terminal, "Contraseña incorrecta.\nInténtelo de nuevo :(\n")
         return
 
 
@@ -280,17 +292,6 @@ def login_user(username: str, password: str, terminal):
 def user_exists(username: str) -> bool:
     users = load_data(USERS_FILE)
     return username in users
-
-def type_text(terminal, text, index=0, delay=10):
-    terminal.config(state="normal")
-    if index < len(text):
-        terminal.insert(tk.END, text[index])
-        terminal.see(tk.END) 
-        terminal.after(delay, type_text, terminal, text, index + 1, delay)
-    else:
-        terminal.insert(tk.END, "\n")
-    terminal.config(state="disabled")
-
 
 def hash_password(password: str, salt: bytes = None) -> tuple:
     if salt is None:

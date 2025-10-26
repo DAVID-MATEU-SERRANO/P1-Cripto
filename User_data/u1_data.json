@@ -1,0 +1,29 @@
+{
+  "username": "u1",
+  "garage": [
+    {
+      "brand": "Mazda",
+      "model": "Miata",
+      "stats": {
+        "speed": 7,
+        "handling": 8,
+        "acceleration": 10,
+        "braking": 7
+      },
+      "cost": 100,
+      "upgrades": [
+        {
+          "name": "Turbo",
+          "effects": {
+            "speed": 2,
+            "handling": -1,
+            "acceleration": 3,
+            "braking": 0
+          },
+          "cost": 100
+        }
+      ]
+    }
+  ],
+  "points": 1999800
+}

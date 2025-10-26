@@ -1,0 +1,30 @@
+[
+    {"name": "Turbo",
+     "effects": {"speed": 2, "handling": -1, "acceleration": 3, "braking": 0},
+     "cost": 100
+    },
+    {"name": "SemiSlick",
+     "effects": {"speed": -1, "handling": 3, "acceleration": 0, "braking": 0},
+     "cost": 50
+    },
+    {"name": "Suspension",
+     "effects": {"speed": 0, "handling": 3, "acceleration": 0, "braking": 0},
+     "cost": 100
+    },
+    {"name": "Rollcage",
+     "effects": {"speed": 0, "handling": 2, "acceleration": -1, "braking": 0},
+     "cost": 50
+    },
+    {"name": "ECU_Tune",
+     "effects": {"speed": 1, "handling": 0, "acceleration": 1, "braking": -1},
+     "cost": 20
+    },
+    {"name": "Performance_Air_Filter",
+     "effects": {"speed": -1, "handling": 0, "acceleration": 1, "braking": 0},
+     "cost": 20
+    },
+    {"name": "Brakes",
+     "effects": {"speed": 0, "handling": 0, "acceleration": 0, "braking": 3},
+     "cost": 100
+    }
+]

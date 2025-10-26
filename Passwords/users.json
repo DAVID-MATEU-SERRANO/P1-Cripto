@@ -1,26 +1,6 @@
 {
-  "mateu": {
-    "salt": "9YLA23NfK84ym6h9ky21Nw==",
-    "hash": "8bldE5crxs/AtvvtCg2xFMCDpIZ21TRepNJQDBrfmNI="
-  },
-  "usuario1": {
-    "salt": "QoFUhWCx0ITtp9RycjXNow==",
-    "hash": "Fa6JB9VYi0isXLm/Dik+xqX4fc26Rxg8xSMLvaMw5Wg="
-  },
-  "mateu2": {
-    "salt": "Xf7aKUtdOo7Vn6rnZQQy/Q==",
-    "hash": "rhgdyZaF6FC6ANAdcHjoLpAc61GAm9/KkMj32vAkVDo="
-  },
-  "usuarioprueba": {
-    "salt": "q5GyjiXlvpAvL/Hsa2jsMQ==",
-    "hash": "MoR1Ju9JME3A883r070xE9oL0c2akPqKpH46RxjvMp8="
-  },
-  "usuarioprueba2": {
-    "salt": "pz5vEvQt4oKAt+xR6K3Gpw==",
-    "hash": "sSo1linFz6D80NaV73vqxLliG3w/e7j2eZJbGkKrGYI="
-  },
-  "aaaaaa1": {
-    "salt": "lMK49VTXgSid18+i8gMfUw==",
-    "hash": "v2UtinVfMxqrMUJSFl+h7hb1Qdeb2I5FJd6HO2iCuRM="
+  "u1": {
+    "salt": "s+BGNISX7obtp/T5FBFd3Q==",
+    "hash": "JqWf4GhE5A1ncfdMjY70Q0/3VHVSp/i5xr/mk4amJj8="
   }
 }
