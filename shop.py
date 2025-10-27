@@ -1,3 +1,4 @@
+from time import sleep
 from utility_functions import load_encrypted_data, store_encrypted_data, type_text
 import tkinter as tk
 from utility_functions import load_data, store_data, type_text
@@ -42,11 +43,17 @@ def car_exists(model:str, user_data:dict):
 def buy_car(car_data:list, user_path:str, terminal, user_key):
     global selected_car
     print(user_path)
-    user_data = load_encrypted_data(user_path, user_key)
-    if car_data[selected_car]["cost"] <= user_data["points"] and not car_exists(car_data[selected_car]["model"], user_data) :
+    user_data = load_encrypted_data(user_path, user_key, terminal)
+    if not user_data:
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
+        return
+    if car_exists(car_data[selected_car]["model"], user_data):
+        type_text(terminal, "Ya has comprado este coche.\nElige otro\n")
+        return
+    if car_data[selected_car]["cost"] <= user_data["points"]:
         user_data["garage"].append(car_data[selected_car])
         user_data["points"] -= car_data[selected_car]["cost"]
-        store_encrypted_data(user_data, user_path, user_key)
+        store_encrypted_data(user_data, user_path, user_key, terminal)
         type_text(terminal, f"{car_data[selected_car]["brand"]} {car_data[selected_car]["model"]} añadido a tu garaje\n")
     else:
         type_text(terminal, f"No tienes suficientes puntos para comprar este coche\nTe faltan {car_data[selected_car]["cost"] - user_data["points"]} puntos\n.")
@@ -91,11 +98,22 @@ def upgrade_exists(upgrade:str, user_data:dict, car_selected:str):
     
 def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, user_key):
     global selected_upgrade
-    user_data = load_encrypted_data(user_path, user_key)
+    user_data = load_encrypted_data(user_path, user_key, terminal)
+    if not user_data:
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
+        return
     if car_selected == "":
-        type_text(terminal, "Indique el coche al que quiere introducir la mejora\n")
+        type_text(terminal, "Indique el coche al que quiere instalar la mejora\n")
+        return
+    if not car_exists(car_selected, user_data):
+        type_text(terminal, "No tienes este coche en tu garaje\n")
+        return
+
     upgrade, car_pos = upgrade_exists(upgrade_data[selected_upgrade]["name"], user_data, car_selected)
-    if upgrade_data[selected_upgrade]["cost"] <= user_data["points"] and not upgrade and car_exists(car_selected, user_data):
+    if upgrade:
+        type_text(terminal, f"Tu {car_selected} ya cuenta con {upgrade_data[selected_upgrade]["name"]}\n")
+        return
+    if upgrade_data[selected_upgrade]["cost"] <= user_data["points"]:
         user_data["garage"][car_pos]["upgrades"].append(upgrade_data[selected_upgrade])
         user_data["points"] -= upgrade_data[selected_upgrade]["cost"]
 
@@ -104,8 +122,9 @@ def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, us
         user_data["garage"][car_pos]["stats"]["acceleration"] += upgrade_data[selected_upgrade]["effects"]["acceleration"]
         user_data["garage"][car_pos]["stats"]["braking"] += upgrade_data[selected_upgrade]["effects"]["braking"]
 
-        store_encrypted_data(user_data, user_path, user_key)
+        store_encrypted_data(user_data, user_path, user_key, terminal) 
         type_text(terminal, f"{upgrade_data[selected_upgrade]["name"]} añadido a tu {user_data["garage"][car_pos]["brand"]} {user_data["garage"][car_pos]["model"]}\n")
+       
     else:
         type_text(terminal, f"No tienes suficientes puntos para comprar este coche\nTe faltan {upgrade_data[selected_upgrade]["cost"] - user_data["points"]} puntos\n.")
 

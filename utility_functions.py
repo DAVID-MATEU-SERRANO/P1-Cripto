@@ -31,24 +31,36 @@ def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
 
         cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
         plaintext = cipher.decrypt_and_verify(ciphertext, tag)
-        type_text(terminal, "pruebapruebapruebapruebapruebapruebapruebapruebaprueba\n")
+        type_text(terminal, 
+                  "Desencriptando archivo del usuario...\n"
+                  f"Nonce extraído: {len(nonce)} bytes \n"
+                  f"Tag de autenticidad extraído: {len(tag)} bytes\n"
+                  f"Verificación MAC exitosa\n"
+                  f"Desencriptación con AES-256 GCM exitosa\n")
         return json.loads(plaintext.decode("utf-8"))
     
     except ValueError as e:
         # Aquí es donde cae la verificación de autenticidad (MAC check failed)
-        print("Error de autenticación: datos corruptos o clave/nonce incorrectos.")
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
         return None
 
-def store_encrypted_data(data: dict, filepath: str, key: bytes):
-
+def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
+    type_text(terminal, 
+                  "Encriptando archivo del usuario...\n"
+                  f"Usada clave para AES-GCM de 32 bytes... \n"
+                  f"Encriptación con AES-256 GCM exitosa\n"
+                  "Datos del usuario guardados correctamente\n")
+    
     plaintext = json.dumps(data).encode("utf-8")  # de dict → bytes
     cipher = AES.new(key, AES.MODE_GCM)
     ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+    
 
     # Guardamos nonce + tag + ciphertext en binario
     with open(filepath, "wb") as f:
         f.write(cipher.nonce + tag + ciphertext)
 
+    
 
 ### Normales
 def load_data(path: str) -> dict:
@@ -72,32 +84,33 @@ def store_data(data: dict, path: str):
     except json.JSONDecodeError:
         raise Exception("Error guardando el archivo\n")
 
-def type_text(terminal, text, index=0, delay=10):
+def type_text(terminal, text, index=0, delay=5):
     """
     Escribe el texto en el terminal letra a letra usando una cola.
-    Si ya hay un texto en curso, el nuevo se añade a la cola y espera su turno.
     """
     global typing_after_id, typing_queue
 
+    # Si estamos empezando un nuevo texto (index == 0)
     if index == 0:
-        # Si hay un texto en curso, añadimos a la cola y salimos
+        # Si ya hay un texto escribiéndose, añadimos a la cola y salimos
         if typing_after_id is not None:
             typing_queue.append(text)
             return
         else:
+            # Si no hay texto en curso, limpiamos el terminal
             terminal.delete("1.0", tk.END)
-        # Si no hay texto en curso y hay algo en la cola, usamos el primer elemento
-        if typing_queue:
-            text = typing_queue.popleft()
 
+    # Escribimos el texto
     if index < len(text):
         terminal.insert(tk.END, text[index])
         terminal.see(tk.END)
         typing_after_id = terminal.after(delay, type_text, terminal, text, index + 1, delay)
     else:
+        # Terminamos este texto
         terminal.insert(tk.END, "\n")
         typing_after_id = None
-        # Si hay mensajes en la cola, empezamos el siguiente
+        
+        # Si hay mensajes en la cola, procesamos el siguiente
         if typing_queue:
             next_text = typing_queue.popleft()
             type_text(terminal, next_text, 0, delay)

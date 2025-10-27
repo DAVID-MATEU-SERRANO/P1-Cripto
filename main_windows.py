@@ -36,7 +36,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             bg="#ac3333",
             activebackground="#bd6c6c",
             activeforeground="white",
-            font=("Consolas", 14, "bold"),
+            font=("Consolas", 7, "bold"),
             relief="flat",
             bd=0,
             padx=20,
@@ -52,7 +52,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             bg="#ac3333",
             activebackground="#bd6c6c",
             activeforeground="white",
-            font=("Consolas", 14, "bold"),
+            font=("Consolas", 7, "bold"),
             relief="flat",
             bd=0,
             padx=20,
@@ -68,7 +68,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             bg="#ac3333",
             activebackground="#bd6c6c",
             activeforeground="white",
-            font=("Consolas", 14, "bold"),
+            font=("Consolas", 7, "bold"),
             relief="flat",
             bd=0,
             padx=20,
@@ -84,7 +84,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             bg="#ac3333",
             activebackground="#bd6c6c",
             activeforeground="white",
-            font=("Consolas", 14, "bold"),
+            font=("Consolas", 7, "bold"),
             relief="flat",
             bd=0,
             padx=20,
@@ -99,7 +99,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             bg="#ac3333",
             activebackground="#bd6c6c",
             activeforeground="white",
-            font=("Consolas", 14, "bold"),
+            font=("Consolas", 7, "bold"),
             relief="flat",
             bd=0,
             padx=20,
@@ -107,8 +107,10 @@ def show_secondary_menu(user_path:str, username:str, user_key):
             cursor="hand2"
         ).pack(pady=(50, 0))
     
-    foot_font = tkfont.Font(family="Impact", size=20)
-    tk.Label(root_secondary_menu, text="夜の峠を制覇せよ  -  Domina la noche", fg="#ffffff", bg="#111", font = foot_font).pack(pady=(70, 0))
+    terminal = tk.Text(root_secondary_menu, width=70, bg="#0e0e0e", fg="#29FFF4",
+                       insertbackground="white", font=("Consolas", 11), relief="flat")
+    terminal.pack(pady=(0, 20))
+    type_text(terminal, f"Inicio de sesión exitoso!\nBienvenido {username}\n")
 
     root_secondary_menu.mainloop()
 

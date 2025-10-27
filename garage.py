@@ -6,7 +6,10 @@ selected_garage_car = 0
 
 def type_garage_car(user_path:str, terminal, user_key):
     global selected_garage_car
-    user_data = load_encrypted_data(user_path, user_key)
+    user_data = load_encrypted_data(user_path, user_key, terminal)
+    if not user_data:
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
+        return
 
     if selected_garage_car == len(user_data["garage"]):
         selected_garage_car = 0

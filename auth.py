@@ -139,7 +139,7 @@ def show_login_window():
     terminal = tk.Text(root_login, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
-    type_text(terminal, "Bienvenido a CryptoRacers\nIntroduzca su usuario y contraseña :)")
+    type_text(terminal, "Bienvenido a CryptoRacers\nLa aplicación de carreras cifrada de extremo a extremo\nIntroduzca su usuario y contraseña :)")
 
     root_login.mainloop()
 
@@ -211,25 +211,29 @@ def show_register_window():
     terminal = tk.Text(root_register, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
-    type_text(terminal, "Bienvenido a CryptoRacers\nIntroduzca un usuario y una contraseña :)")
+    type_text(terminal, "Bienvenido a CryptoRacers\nLa aplicación de carreras cifrada de extremo a extremo\nIntroduzca un usuario y contraseña :)")
 
     root_register.mainloop()
 
 
 ### REGISTER AND LOGIN FUNCTIONS ###
 def register_user(username: str, password: str, terminal):
-    terminal.delete("1.0", tk.END)
     if password == "" or username == "":
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
     if user_exists(username):
-        type_text(terminal, "El usuario ya existe.\n")
+        type_text(terminal, "El usuario ya existe\nIntroduzca uno distinto\n")
+        return
+
+    username_regex = re.compile(r'^(?=.*[a-zA-Z]).{5,}$')
+    if not username_regex.match(username):
+        type_text(terminal, "Debe introducir un nombre de usuario válido\nEl nombre de usuario debe tener longitud mínima de 5 y contener al menos 1 letra\n")
         return
     
-    regex = re.compile(r'^(?=.{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
-    if not regex.match(password):
-        type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) \ny tener una longitud mínima de 8")
+    password_regex = re.compile(r'^(?=.{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
+    if not password_regex.match(password):
+        type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) y tener una longitud mínima de 8")
         return 
 
 
@@ -248,27 +252,31 @@ def register_user(username: str, password: str, terminal):
     user_data = load_data(USER_DATA_PATH)
     user_data["username"] = username
     user_data["garage"] = []
-    user_data["points"] = 200
+    user_data["points"] = 10000000
 
     user_key = generate_user_key(password, base64.b64decode(salt_key))
-    store_encrypted_data(user_data, USER_DATA_PATH, user_key)
+    store_encrypted_data(user_data, USER_DATA_PATH, user_key, terminal)
 
     type_text(terminal, (
-    f"Salt {salt_password} generado y aplicado...\n"
-    "Aplicado pepper secreto...\n"
+    f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
+    "Aplicando pepper secreto...\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
-    f"Hash SHA-256 {hash_b64} generado\ncorrectamente...\n"
+    f"Hash SHA-256 de 32 bytes -> {hash_b64} generado correctamente...\n"
+    f"Generando clave para AES-GCM de 32 bytes...\n"
+    f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
+    "Aplicando pepper secreto...\n"
+    f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
+    "Clave del usuario generada correctamente...\n"
     "Datos registrados correctamente!\n"))
 
 
 def login_user(username: str, password: str, terminal, root):
-    terminal.delete("1.0", tk.END)
     if password == "" or username == "":
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
     if not user_exists(username):
-        type_text(terminal, "Usuario no encontrado.\nIntroduzca uno que esté registrado\n")
+        type_text(terminal, "Usuario no encontrado\nIntroduzca uno que esté registrado\n")
         return
 
     users = load_data(USERS_FILE)
@@ -286,7 +294,7 @@ def login_user(username: str, password: str, terminal, root):
         show_secondary_menu(USER_DATA_PATH, username, user_key)
         return
     else:
-        type_text(terminal, "Contraseña incorrecta.\nInténtelo de nuevo :(\n")
+        type_text(terminal, f"Los hashes no coinciden\nHash calculado -> {computed_hash}\nHash almacenado -> {stored_hash}\nContraseña incorrecta\nInténtelo de nuevo :(\n")
         return
 
 
