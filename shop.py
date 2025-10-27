@@ -1,8 +1,6 @@
 from utility_functions import type_text
-from tkinter import font as tkfont
 import tkinter as tk
 from utility_functions import load_data, store_data, type_text
-from auth import type_text
 
 ### Variables globales
 selected_car = 0
@@ -25,7 +23,6 @@ def type_car(car_data:list, terminal):
 def next_car(car_data:list, terminal):
     global selected_car
     selected_car +=1
-    print(selected_car)
     if selected_car == len(car_data):
         selected_car = 0
     type_car(car_data, terminal)
@@ -33,7 +30,6 @@ def next_car(car_data:list, terminal):
 def previous_car(car_data:list, terminal):
     global selected_car
     selected_car -=1
-    print(selected_car)
     if selected_car < 0:
         selected_car = len(car_data) - 1
     terminal.delete("1.0", tk.END)
@@ -45,14 +41,16 @@ def car_exists(model:str, user_data:dict):
             return True
     return False
     
-def buy_car(car_data:list, user_data:dict, terminal, user_path:str):
+def buy_car(car_data:list, user_path:str, terminal):
     global selected_car
+    print(user_path)
+    user_data = load_data(user_path)
     if car_data[selected_car]["cost"] <= user_data["points"] and not car_exists(car_data[selected_car]["model"], user_data) :
         user_data["garage"].append(car_data[selected_car])
         user_data["points"] -= car_data[selected_car]["cost"]
         store_data(user_data, user_path)
         terminal.delete("1.0", tk.END)
-        type_text(terminal, f"{car_data[selected_car]["brand"]} {car_data[selected_car]["model"]} añadido a tu garage\n")
+        type_text(terminal, f"{car_data[selected_car]["brand"]} {car_data[selected_car]["model"]} añadido a tu garaje\n")
     else:
         terminal.delete("1.0", tk.END)
         type_text(terminal, f"No tienes suficientes puntos para comprar este coche\nTe faltan {car_data[selected_car]["cost"] - user_data["points"]} puntos\n.")
@@ -97,8 +95,9 @@ def upgrade_exists(upgrade:str, user_data:dict, car_selected:str):
             car_pos += 1
     return False, car_pos
     
-def buy_upgrade(upgrade_data:list, user_data:dict, terminal, user_path:str, car_selected:str):
+def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str):
     global selected_upgrade
+    user_data = load_data(user_path)
     if car_selected == "":
         terminal.delete("1.0", tk.END)
         type_text(terminal, "Indique el coche al que quiere introducir la mejora\n")
@@ -118,3 +117,4 @@ def buy_upgrade(upgrade_data:list, user_data:dict, terminal, user_path:str, car_
     else:
         terminal.delete("1.0", tk.END)
         type_text(terminal, f"No tienes suficientes puntos para comprar este coche\nTe faltan {upgrade_data[selected_upgrade]["cost"] - user_data["points"]} puntos\n.")
+

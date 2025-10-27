@@ -281,7 +281,7 @@ def login_user(username: str, password: str, terminal, root):
     if computed_hash == stored_hash:
         USER_DATA_PATH = f"User_data/{username}_data.json"
         root.destroy()
-        show_secondary_menu(USER_DATA_PATH)
+        show_secondary_menu(USER_DATA_PATH, username)
         return
     else:
         type_text(terminal, "Contraseña incorrecta.\nInténtelo de nuevo :(\n")
