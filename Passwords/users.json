@@ -1,6 +1,7 @@
 {
-  "u1": {
-    "salt": "s+BGNISX7obtp/T5FBFd3Q==",
-    "hash": "JqWf4GhE5A1ncfdMjY70Q0/3VHVSp/i5xr/mk4amJj8="
+  "mateu": {
+    "salt_password": "2HqGbCjC9zZxboWNqsAsBw==",
+    "salt_key": "RYn4VXUxwi4GmMyR9OlQSw==",
+    "hash": "VODZqZpMchFDGXKqASq6kje3eq+MZpV4OYUIfHks0j8="
   }
 }

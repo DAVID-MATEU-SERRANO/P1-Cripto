@@ -1,6 +1,45 @@
 import json
 import tkinter as tk
+from Crypto.Cipher import AES
+import base64
+import hashlib
+import os
 
+PEPPER_KEY = "pepper_para_AES"  # distinto del PEPPER de la contraseña
+DEFAULT_ITERATIONS = 200_000
+
+def generate_user_key(password: str, salt: bytes) -> bytes:
+    value = salt + (password + PEPPER_KEY).encode("utf-8")
+    for _ in range(DEFAULT_ITERATIONS):
+        value = hashlib.sha256(value).digest()
+    return value  # 32 bytes → clave AES-256
+
+
+def load_encrypted_data(filepath: str, key: bytes) -> dict:
+    with open(filepath, "rb") as f:
+        file_bytes = f.read()
+
+    nonce = file_bytes[:16]
+    tag = file_bytes[16:32]
+    ciphertext = file_bytes[32:]
+
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+
+    return json.loads(plaintext.decode("utf-8"))
+
+def store_encrypted_data(data: dict, filepath: str, key: bytes):
+
+    plaintext = json.dumps(data).encode("utf-8")  # de dict → bytes
+    cipher = AES.new(key, AES.MODE_GCM)
+    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+
+    # Guardamos nonce + tag + ciphertext en binario
+    with open(filepath, "wb") as f:
+        f.write(cipher.nonce + tag + ciphertext)
+
+
+### Normales
 def load_data(path: str) -> dict:
     """Carga y devuelve el diccionario de usuarios desde users.json."""
     try:

@@ -1,4 +1,4 @@
-from utility_functions import type_text
+from utility_functions import load_encrypted_data, store_encrypted_data, type_text
 import tkinter as tk
 from utility_functions import load_data, store_data, type_text
 
@@ -41,14 +41,14 @@ def car_exists(model:str, user_data:dict):
             return True
     return False
     
-def buy_car(car_data:list, user_path:str, terminal):
+def buy_car(car_data:list, user_path:str, terminal, user_key):
     global selected_car
     print(user_path)
-    user_data = load_data(user_path)
+    user_data = load_encrypted_data(user_path, user_key)
     if car_data[selected_car]["cost"] <= user_data["points"] and not car_exists(car_data[selected_car]["model"], user_data) :
         user_data["garage"].append(car_data[selected_car])
         user_data["points"] -= car_data[selected_car]["cost"]
-        store_data(user_data, user_path)
+        store_encrypted_data(user_data, user_path, user_key)
         terminal.delete("1.0", tk.END)
         type_text(terminal, f"{car_data[selected_car]["brand"]} {car_data[selected_car]["model"]} añadido a tu garaje\n")
     else:
@@ -95,9 +95,9 @@ def upgrade_exists(upgrade:str, user_data:dict, car_selected:str):
             car_pos += 1
     return False, car_pos
     
-def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str):
+def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, user_key):
     global selected_upgrade
-    user_data = load_data(user_path)
+    user_data = load_encrypted_data(user_path, user_key)
     if car_selected == "":
         terminal.delete("1.0", tk.END)
         type_text(terminal, "Indique el coche al que quiere introducir la mejora\n")
@@ -111,7 +111,7 @@ def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str):
         user_data["garage"][car_pos]["stats"]["acceleration"] += upgrade_data[selected_upgrade]["effects"]["acceleration"]
         user_data["garage"][car_pos]["stats"]["braking"] += upgrade_data[selected_upgrade]["effects"]["braking"]
 
-        store_data(user_data, user_path)
+        store_encrypted_data(user_data, user_path, user_key)
         terminal.delete("1.0", tk.END)
         type_text(terminal, f"{upgrade_data[selected_upgrade]["name"]} añadido a tu {user_data["garage"][car_pos]["brand"]} {user_data["garage"][car_pos]["model"]}\n")
     else:

@@ -7,7 +7,7 @@ from auth import type_text
 from shop import type_car, next_car, previous_car, buy_car, type_upgrade,next_upgrade, previous_upgrade, buy_upgrade
 
 
-def show_secondary_menu(user_path:str, username:str):
+def show_secondary_menu(user_path:str, username:str, user_key):
     root_secondary_menu = tk.Tk()
     root_secondary_menu.title("CryptoRacers")
     root_secondary_menu.resizable(False, False)
@@ -31,7 +31,7 @@ def show_secondary_menu(user_path:str, username:str):
     tk.Button(
             root_secondary_menu,
             text="VER PUNTOS",
-            command=lambda: [root_secondary_menu.destroy(), show_points_menu(user_path, username)],
+            command=lambda: [root_secondary_menu.destroy(), show_points_menu(user_path, username, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -47,7 +47,7 @@ def show_secondary_menu(user_path:str, username:str):
     tk.Button(
             root_secondary_menu,
             text="TIENDA",
-            command=lambda: [root_secondary_menu.destroy(), show_initial_shop_menu(user_path, username)],
+            command=lambda: [root_secondary_menu.destroy(), show_initial_shop_menu(user_path, username, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -63,7 +63,7 @@ def show_secondary_menu(user_path:str, username:str):
     tk.Button(
             root_secondary_menu,
             text="GARAJE",
-            command=lambda: [root_secondary_menu.destroy(), show_garage_menu(user_path, username)],
+            command=lambda: [root_secondary_menu.destroy(), show_garage_menu(user_path, username, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -112,7 +112,7 @@ def show_secondary_menu(user_path:str, username:str):
 
     root_secondary_menu.mainloop()
 
-def show_initial_shop_menu(user_path:str, user_name:str):
+def show_initial_shop_menu(user_path:str, user_name:str, user_key):
 
     root_initial_shop_menu = tk.Tk()
     root_initial_shop_menu.title("CryptoRacers")
@@ -137,7 +137,7 @@ def show_initial_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_initial_shop_menu,
             text="COCHES",
-            command=lambda: [root_initial_shop_menu.destroy(), show_cars_shop_menu(user_path, user_name)],
+            command=lambda: [root_initial_shop_menu.destroy(), show_cars_shop_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -153,7 +153,7 @@ def show_initial_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_initial_shop_menu,
             text="MEJORAS",
-            command=lambda: [root_initial_shop_menu.destroy(), show_upgrades_shop_menu(user_path, user_name)],
+            command=lambda: [root_initial_shop_menu.destroy(), show_upgrades_shop_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -168,7 +168,7 @@ def show_initial_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_initial_shop_menu,
             text="ATRÁS",
-            command=lambda: [root_initial_shop_menu.destroy(), show_secondary_menu(user_path, user_name)],
+            command=lambda: [root_initial_shop_menu.destroy(), show_secondary_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -183,7 +183,7 @@ def show_initial_shop_menu(user_path:str, user_name:str):
 
     root_initial_shop_menu.mainloop()
 
-def show_cars_shop_menu(user_path:str, user_name:str):
+def show_cars_shop_menu(user_path:str, user_name:str, user_key):
     car_data = load_data("Shop_info/cars_shop.json")
 
     root_cars_shop_menu = tk.Tk()
@@ -241,7 +241,7 @@ def show_cars_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_cars_shop_menu,
             text="COMPRAR",
-            command=lambda: [buy_car(car_data, user_path, terminal)],
+            command=lambda: [buy_car(car_data, user_path, terminal, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -256,7 +256,7 @@ def show_cars_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_cars_shop_menu,
             text="ATRÁS",
-            command=lambda: [root_cars_shop_menu.destroy(), show_initial_shop_menu(user_path, user_name)],
+            command=lambda: [root_cars_shop_menu.destroy(), show_initial_shop_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -277,7 +277,7 @@ def show_cars_shop_menu(user_path:str, user_name:str):
 
     root_cars_shop_menu.mainloop()
 
-def show_upgrades_shop_menu(user_path:str, user_name:str):
+def show_upgrades_shop_menu(user_path:str, user_name:str, user_key):
     upgrades_data = load_data("Shop_info/upgrades_shop.json")
 
     root_upgrades_shop_menu = tk.Tk()
@@ -337,7 +337,7 @@ def show_upgrades_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_upgrades_shop_menu,
             text="COMPRAR",
-            command=lambda: [buy_upgrade(upgrades_data, terminal, user_path, car_upgrade_entry.get())],
+            command=lambda: [buy_upgrade(upgrades_data, terminal, user_path, car_upgrade_entry.get(), user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -352,7 +352,7 @@ def show_upgrades_shop_menu(user_path:str, user_name:str):
     tk.Button(
             root_upgrades_shop_menu,
             text="ATRÁS",
-            command=lambda: [root_upgrades_shop_menu.destroy(), show_initial_shop_menu(user_path, user_name)],
+            command=lambda: [root_upgrades_shop_menu.destroy(), show_initial_shop_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -373,7 +373,7 @@ def show_upgrades_shop_menu(user_path:str, user_name:str):
 
     root_upgrades_shop_menu.mainloop()
 
-def show_points_menu(user_path:str, user_name:str):
+def show_points_menu(user_path:str, user_name:str, user_key):
     root_points_menu = tk.Tk()
     root_points_menu.title("Cars Shop CryptoRacers")
     root_points_menu.resizable(False, False)
@@ -398,7 +398,7 @@ def show_points_menu(user_path:str, user_name:str):
     tk.Button(
             root_points_menu,
             text="ATRÁS",
-            command=lambda: [root_points_menu.destroy(), show_secondary_menu(user_path, user_name)],
+            command=lambda: [root_points_menu.destroy(), show_secondary_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -415,11 +415,11 @@ def show_points_menu(user_path:str, user_name:str):
     terminal = tk.Text(root_points_menu, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
-    type_points(user_path, terminal)
+    type_points(user_path, terminal, user_key)
 
     root_points_menu.mainloop()
 
-def show_garage_menu(user_path:str, user_name:str):
+def show_garage_menu(user_path:str, user_name:str, user_key):
 
     root_garage_menu = tk.Tk()
     root_garage_menu.title("Cars Shop CryptoRacers")
@@ -445,7 +445,7 @@ def show_garage_menu(user_path:str, user_name:str):
     tk.Button(
             root_garage_menu,
             text="SIGUIENTE COCHE",
-            command=lambda: [next_garage_car(user_path, terminal)],
+            command=lambda: [next_garage_car(user_path, terminal, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -461,7 +461,7 @@ def show_garage_menu(user_path:str, user_name:str):
     tk.Button(
             root_garage_menu,
             text="ANTERIOR COCHE",
-            command=lambda: [previous_garage_car(user_path, terminal)],
+            command=lambda: [previous_garage_car(user_path, terminal, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -477,7 +477,7 @@ def show_garage_menu(user_path:str, user_name:str):
     tk.Button(
             root_garage_menu,
             text="ATRÁS",
-            command=lambda: [root_garage_menu.destroy(), show_secondary_menu(user_path, user_name)],
+            command=lambda: [root_garage_menu.destroy(), show_secondary_menu(user_path, user_name, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -494,6 +494,6 @@ def show_garage_menu(user_path:str, user_name:str):
     terminal = tk.Text(root_garage_menu, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
-    type_garage_car(user_path, terminal)
+    type_garage_car(user_path, terminal, user_key)
 
     root_garage_menu.mainloop()

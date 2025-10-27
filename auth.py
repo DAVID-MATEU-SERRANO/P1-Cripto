@@ -5,9 +5,9 @@ import base64
 from time import sleep
 import tkinter as tk
 from tkinter import font as tkfont
-from utility_functions import load_data, store_data, type_text
+from utility_functions import generate_user_key, load_data, store_data, store_encrypted_data, type_text
 import re
-from main_program import show_secondary_menu
+from main_windows import show_secondary_menu
 
 DEFAULT_ITERATIONS = 200_000
 USERS_FILE = "Passwords/users.json"
@@ -227,33 +227,34 @@ def register_user(username: str, password: str, terminal):
         type_text(terminal, "El usuario ya existe.\n")
         return
     
-    '''    
     regex = re.compile(r'^(?=.{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
     if not regex.match(password):
         type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) \ny tener una longitud mínima de 8")
         return 
-    '''
 
-    salt_b64, hash_b64 = hash_password(password)
+
+    salt_password, salt_key, hash_b64 = hash_password(password)
 
 
     users_auth = load_data(USERS_FILE)
     users_auth[username] = {
-        "salt": salt_b64,
+        "salt_password": salt_password,
+        "salt_key": salt_key,
         "hash": hash_b64
     }
+    store_data(users_auth, USERS_FILE)
+
     USER_DATA_PATH = f"User_data/{username}_data.json"
     user_data = load_data(USER_DATA_PATH)
     user_data["username"] = username
     user_data["garage"] = []
     user_data["points"] = 200
 
-    
-    store_data(users_auth, USERS_FILE)
-    store_data(user_data, USER_DATA_PATH)
+    user_key = generate_user_key(password, base64.b64decode(salt_key))
+    store_encrypted_data(user_data, USER_DATA_PATH, user_key)
 
     type_text(terminal, (
-    f"Salt {salt_b64} generado y aplicado...\n"
+    f"Salt {salt_password} generado y aplicado...\n"
     "Aplicado pepper secreto...\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
     f"Hash SHA-256 {hash_b64} generado\ncorrectamente...\n"
@@ -272,16 +273,17 @@ def login_user(username: str, password: str, terminal, root):
 
     users = load_data(USERS_FILE)
     user_data = users[username]
-    salt_b64 = user_data["salt"]
+    salt_password = user_data["salt_password"]
     stored_hash = user_data["hash"]
-    salt = base64.b64decode(salt_b64)
+    salt_password = base64.b64decode(salt_password)
 
-    _, computed_hash = hash_password(password, salt)
+    _, _,computed_hash = hash_password(password, salt_password)
 
     if computed_hash == stored_hash:
         USER_DATA_PATH = f"User_data/{username}_data.json"
+        user_key = generate_user_key(password, base64.b64decode(user_data["salt_key"]))
         root.destroy()
-        show_secondary_menu(USER_DATA_PATH, username)
+        show_secondary_menu(USER_DATA_PATH, username, user_key)
         return
     else:
         type_text(terminal, "Contraseña incorrecta.\nInténtelo de nuevo :(\n")
@@ -293,18 +295,20 @@ def user_exists(username: str) -> bool:
     users = load_data(USERS_FILE)
     return username in users
 
-def hash_password(password: str, salt: bytes = None) -> tuple:
-    if salt is None:
-        salt = os.urandom(16)
+def hash_password(password: str, salt_password: bytes = None) -> tuple:
+    if salt_password is None:
+        salt_password = os.urandom(16) #bytes
 
-    password_peppered = (password + PEPPER).encode("utf-8")
+    password_peppered = (password + PEPPER).encode("utf-8") #bytes
     
-    value = salt + password_peppered
+    value = salt_password + password_peppered #bytes
 
     for _ in range(DEFAULT_ITERATIONS):
         value = hashlib.sha256(value).digest()
+    ## digest devuelve bytes crudos, luego lo pasas a hexadecimal y a ascii para poder meterlo en el json.
 
     return (
-        base64.b64encode(salt).decode("ascii"),
+        base64.b64encode(salt_password).decode("ascii"),
+        base64.b64encode(os.urandom(16)).decode("ascii"), #salt_key
         base64.b64encode(value).decode("ascii")
     )

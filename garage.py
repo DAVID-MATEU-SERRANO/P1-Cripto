@@ -1,12 +1,12 @@
-from utility_functions import load_data, type_text
+from utility_functions import load_data, load_encrypted_data, type_text
 import tkinter as tk
 
 
 selected_garage_car = 0
 
-def type_garage_car(user_path:str, terminal):
+def type_garage_car(user_path:str, terminal, user_key):
     global selected_garage_car
-    user_data = load_data(user_path)
+    user_data = load_encrypted_data(user_path, user_key)
     terminal.delete("1.0", tk.END)
 
     if selected_garage_car == len(user_data["garage"]):
@@ -32,12 +32,12 @@ def type_garage_car(user_path:str, terminal):
     Frenada: {user_data["garage"][selected_garage_car]["stats"]["braking"]}
     Mejoras: {upgrades_text}""")
 
-def next_garage_car(user_path:str, terminal):
+def next_garage_car(user_path:str, terminal, user_key):
     global selected_garage_car
     selected_garage_car +=1
-    type_garage_car(user_path, terminal)
+    type_garage_car(user_path, terminal, user_key)
 
 def previous_garage_car(user_path:str, terminal):
     global selected_garage_car
     selected_garage_car -=1
-    type_garage_car(user_path, terminal)    
+    type_garage_car(user_path, terminal, user_key)    
