@@ -75,11 +75,9 @@ def load_data(path: str) -> dict:
 
 def store_data(data: dict, path: str):
     """Guarda el diccionario de usuarios en users.json de forma atómica."""
-    existing_data = load_data(path)
-    existing_data.update(data)
     try:
         with open(path, "w", encoding="utf-8", newline="") as file:
-                json.dump(existing_data, file, indent=2)
+                json.dump(data, file, indent=2)
     except json.JSONDecodeError:
         raise Exception("Error guardando el archivo\n")
 
@@ -113,3 +111,23 @@ def type_text(terminal, text, index=0, delay=10):
         if typing_queue:
             next_text = typing_queue.popleft()
             type_text(terminal, next_text, 0, delay)
+
+def user_exists(username: str, user_file) -> bool:
+    users = load_data(user_file)
+    return username in users
+
+def hash_password(password: str, salt_password: bytes = None) -> tuple:
+    if salt_password is None:
+        salt_password = os.urandom(16) #bytes
+    
+    value = salt_password + (password).encode("utf-8") #bytes
+
+    for _ in range(DEFAULT_ITERATIONS):
+        value = hashlib.sha256(value).digest()
+    ## digest devuelve bytes crudos, luego lo pasas a hexadecimal y a ascii para poder meterlo en el json.
+
+    return (
+        base64.b64encode(salt_password).decode("ascii"),
+        base64.b64encode(os.urandom(16)).decode("ascii"), #salt_key
+        base64.b64encode(value).decode("ascii")
+    )

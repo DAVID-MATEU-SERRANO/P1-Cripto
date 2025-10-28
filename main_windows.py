@@ -2,6 +2,7 @@ from tkinter import font as tkfont
 import tkinter as tk
 from garage import next_garage_car, previous_garage_car, type_garage_car
 from points import type_points
+from race import next_race, previous_race, race, send_race, type_race
 from utility_functions import load_data, store_data, type_text
 from auth import type_text
 from shop import type_car, next_car, previous_car, buy_car, type_upgrade,next_upgrade, previous_upgrade, buy_upgrade
@@ -79,7 +80,7 @@ def show_secondary_menu(user_path:str, username:str, user_key):
     tk.Button(
             root_secondary_menu,
             text="PROPONER CARRERA",
-            command=lambda: [root_secondary_menu.destroy()],
+            command=lambda: [root_secondary_menu.destroy(), show_propose_race(user_path, username, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -93,8 +94,8 @@ def show_secondary_menu(user_path:str, username:str, user_key):
         ).pack(pady=(50, 0))
     tk.Button(
             root_secondary_menu,
-            text="INICIAR CARRERA",
-            command=lambda: [root_secondary_menu.destroy()],
+            text="CARRERAS DISPONIBLES",
+            command=lambda: [root_secondary_menu.destroy(), show_available_races(user_path, username, user_key)],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -499,3 +500,171 @@ def show_garage_menu(user_path:str, user_name:str, user_key):
     type_garage_car(user_path, terminal, user_key)
 
     root_garage_menu.mainloop()
+
+
+def show_propose_race(user_path:str, user_name:str, user_key):
+    root_propose_race = tk.Tk()
+    root_propose_race.title("Login CryptoRacers")
+    root_propose_race.resizable(False, False)
+
+    # Tamaño y centrado
+    width = 800
+    height = 600
+    screen_width = root_propose_race.winfo_screenwidth()
+    screen_height = root_propose_race.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    root_propose_race.geometry(f"{width}x{height}+{x}+{y}")
+    root_propose_race.configure(bg="#191919")
+
+    # --- Estilo general ---
+    title_font = tkfont.Font(family="Impact", size=70, weight="bold")
+    label_font = tkfont.Font(family="Consolas", size=17, weight="bold")
+    button_font = tkfont.Font(family="Consolas", size=12, weight="bold")
+    # --- Título estilo "CryptoRacers" ---
+    tk.Label(root_propose_race, text=user_name, fg="white", bg="#191919", font=title_font).pack(pady=(10, 0))
+
+    # --- Campos de usuario y contraseña ---
+    tk.Label(root_propose_race, text="RIVAL (introduce username)", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
+    rival_username_entry = tk.Entry(root_propose_race, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    rival_username_entry.pack(pady=(0, 20))
+
+    tk.Label(root_propose_race, text="COCHE (elige uno de tus coches para correr)", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
+    race_car_entry = tk.Entry(root_propose_race, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    race_car_entry.pack(pady=(0, 0))
+
+    tk.Button(
+            root_propose_race,
+            text="ENVIAR CARRERA",
+            command=lambda: [send_race(rival_username_entry.get(), race_car_entry.get(), user_name, terminal, user_path, user_key)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(40, 0))
+    
+    tk.Button(
+            root_propose_race,
+            text="ATRÁS",
+            command=lambda: [root_propose_race.destroy(), show_secondary_menu(user_path, user_name, user_key)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(20, 30))
+    
+    terminal = tk.Text(root_propose_race, width=70, bg="#0e0e0e", fg="#29FFF4",
+                       insertbackground="white", font=("Consolas", 11), relief="flat")
+    terminal.pack(pady=(0, 20))
+
+    root_propose_race.mainloop()
+
+def show_available_races(user_path:str, user_name:str, user_key):
+    root_available_races = tk.Tk()
+    root_available_races.title("Login CryptoRacers")
+    root_available_races.resizable(False, False)
+
+    # Tamaño y centrado
+    width = 800
+    height = 600
+    screen_width = root_available_races.winfo_screenwidth()
+    screen_height = root_available_races.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    root_available_races.geometry(f"{width}x{height}+{x}+{y}")
+    root_available_races.configure(bg="#191919")
+
+    # --- Estilo general ---
+    title_font = tkfont.Font(family="Impact", size=70, weight="bold")
+    label_font = tkfont.Font(family="Consolas", size=17, weight="bold")
+    button_font = tkfont.Font(family="Consolas", size=5, weight="bold")
+    # --- Título estilo "CryptoRacers" ---
+    tk.Label(root_available_races, text=user_name, fg="white", bg="#191919", font=title_font).pack(pady=(10, 0))
+
+    # --- Campos de usuario y contraseña ---
+    tk.Button(
+            root_available_races,
+            text="SIGUIENTE CARRERA",
+            command=lambda: [next_race(user_name, terminal, user_key)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(20, 0))
+    
+    tk.Button(
+            root_available_races,
+            text="ANTERIOR CARRERA",
+            command=lambda: [previous_race(user_name, terminal, user_key)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(20, 0))
+
+    tk.Label(root_available_races, text="COCHE (elige uno de tus coches para correr)", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
+    race_car_entry = tk.Entry(root_available_races, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    race_car_entry.pack(pady=(0, 0))
+
+    tk.Button(
+            root_available_races,
+            text="INICIAR CARRERA",
+            command=lambda: [race(user_name, user_path, user_key, terminal, race_car_entry.get())],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(40, 0))
+    
+    tk.Button(
+            root_available_races,
+            text="ATRÁS",
+            command=lambda: [root_available_races.destroy(), show_secondary_menu(user_path, user_name, user_key)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(20, 30))
+    
+    terminal = tk.Text(root_available_races, width=70, bg="#0e0e0e", fg="#29FFF4",
+                       insertbackground="white", font=("Consolas", 11), relief="flat")
+    terminal.pack(pady=(0, 20))
+    type_race(user_name, terminal, user_key)
+
+    root_available_races.mainloop()

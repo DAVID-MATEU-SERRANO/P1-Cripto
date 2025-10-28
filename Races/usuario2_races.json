@@ -1,0 +1,32 @@
+[
+  {
+    "rival": "user1",
+    "race_car": {
+      "brand": "Nissan",
+      "model": "R34",
+      "stats": {
+        "speed": 9,
+        "handling": 9,
+        "acceleration": 9,
+        "braking": 9
+      },
+      "cost": 400,
+      "upgrades": []
+    }
+  },
+  {
+    "rival": "user1",
+    "race_car": {
+      "brand": "Nissan",
+      "model": "R32",
+      "stats": {
+        "speed": 9,
+        "handling": 7,
+        "acceleration": 9,
+        "braking": 9
+      },
+      "cost": 400,
+      "upgrades": []
+    }
+  }
+]

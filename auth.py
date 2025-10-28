@@ -5,12 +5,12 @@ import base64
 from time import sleep
 import tkinter as tk
 from tkinter import font as tkfont
-from utility_functions import generate_user_key, load_data, store_data, store_encrypted_data, type_text
+from const import DEFAULT_ITERATIONS, USERS_PATH
+from utility_functions import generate_user_key, hash_password, load_data, store_data, store_encrypted_data, type_text, user_exists
 import re
 from main_windows import show_secondary_menu
 
-DEFAULT_ITERATIONS = 200_000
-USERS_FILE = "Passwords/users.json"
+
 
 #### SHOW WINDOWS ####
 def show_initial_window():
@@ -221,7 +221,7 @@ def register_user(username: str, password: str, terminal):
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
-    if user_exists(username):
+    if user_exists(username, USERS_PATH):
         type_text(terminal, "El usuario ya existe\nIntroduzca uno distinto\n")
         return
 
@@ -239,13 +239,13 @@ def register_user(username: str, password: str, terminal):
     salt_password, salt_key, hash_b64 = hash_password(password)
 
 
-    users_auth = load_data(USERS_FILE)
+    users_auth = load_data(USERS_PATH)
     users_auth[username] = {
         "salt_password": salt_password,
         "salt_key": salt_key,
         "hash": hash_b64
     }
-    store_data(users_auth, USERS_FILE)
+    store_data(users_auth, USERS_PATH)
 
     USER_DATA_PATH = f"User_data/{username}_data.json"
     user_data = load_data(USER_DATA_PATH)
@@ -272,11 +272,11 @@ def login_user(username: str, password: str, terminal, root):
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
-    if not user_exists(username):
+    if not user_exists(username, USERS_PATH):
         type_text(terminal, "Usuario no encontrado\nIntroduzca uno que esté registrado\n")
         return
 
-    users = load_data(USERS_FILE)
+    users = load_data(USERS_PATH)
     user_data = users[username]
     salt_password = user_data["salt_password"]
     stored_hash = user_data["hash"]
@@ -296,22 +296,3 @@ def login_user(username: str, password: str, terminal, root):
 
 
 ### AUXILIARY FUNCTIONS ###
-def user_exists(username: str) -> bool:
-    users = load_data(USERS_FILE)
-    return username in users
-
-def hash_password(password: str, salt_password: bytes = None) -> tuple:
-    if salt_password is None:
-        salt_password = os.urandom(16) #bytes
-    
-    value = salt_password + (password).encode("utf-8") #bytes
-
-    for _ in range(DEFAULT_ITERATIONS):
-        value = hashlib.sha256(value).digest()
-    ## digest devuelve bytes crudos, luego lo pasas a hexadecimal y a ascii para poder meterlo en el json.
-
-    return (
-        base64.b64encode(salt_password).decode("ascii"),
-        base64.b64encode(os.urandom(16)).decode("ascii"), #salt_key
-        base64.b64encode(value).decode("ascii")
-    )

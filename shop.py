@@ -1,4 +1,3 @@
-from time import sleep
 from utility_functions import load_encrypted_data, store_encrypted_data, type_text
 import tkinter as tk
 from utility_functions import load_data, store_data, type_text
@@ -35,10 +34,13 @@ def previous_car(car_data:list, terminal):
     type_car(car_data, terminal)
 
 def car_exists(model:str, user_data:dict):
+    car_pos = 0
     for car in user_data["garage"]:
         if car["model"] == model:
-            return True
-    return False
+            return True, car_pos
+        else:
+            car_pos +=1
+    return False, car_pos
     
 def buy_car(car_data:list, user_path:str, terminal, user_key):
     global selected_car
@@ -46,7 +48,8 @@ def buy_car(car_data:list, user_path:str, terminal, user_key):
     user_data = load_encrypted_data(user_path, user_key, terminal)
     if not user_data:
         return
-    if car_exists(car_data[selected_car]["model"], user_data):
+    car, _ = car_exists(car_data[selected_car]["model"], user_data)
+    if car:
         type_text(terminal, "Ya has comprado este coche.\nElige otro\n")
         return
     if car_data[selected_car]["cost"] <= user_data["points"]:
@@ -84,16 +87,11 @@ def previous_upgrade(upgrade_data:list, terminal):
         selected_upgrade = len(upgrade_data) - 1
     type_upgrade(upgrade_data, terminal)
 
-def upgrade_exists(upgrade:str, user_data:dict, car_selected:str):
-    car_pos = 0
-    for car in user_data["garage"]:
-        if car["model"] == car_selected:
-            for up in car["upgrades"]:
-                if up["name"] == upgrade:
+def upgrade_exists(upgrade:str, user_data:dict, car_pos:int):
+    for upgrade in user_data["garage"][car_pos]:
+        if upgrade["name"] == upgrade:
                     return True
-        else:
-            car_pos += 1
-    return False, car_pos
+    return False
     
 def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, user_key):
     global selected_upgrade
@@ -103,11 +101,12 @@ def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, us
     if car_selected == "":
         type_text(terminal, "Indique el coche al que quiere instalar la mejora\n")
         return
-    if not car_exists(car_selected, user_data):
+    car, car_pos = car_exists(car_selected, user_data)
+    if not car:
         type_text(terminal, "No tienes este coche en tu garaje\n")
         return
 
-    upgrade, car_pos = upgrade_exists(upgrade_data[selected_upgrade]["name"], user_data, car_selected)
+    upgrade = upgrade_exists(upgrade_data[selected_upgrade]["name"], user_data, car_pos)
     if upgrade:
         type_text(terminal, f"Tu {car_selected} ya cuenta con {upgrade_data[selected_upgrade]["name"]}\n")
         return
