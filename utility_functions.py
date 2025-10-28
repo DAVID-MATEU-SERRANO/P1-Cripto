@@ -5,40 +5,68 @@ import base64
 import hashlib
 import os
 from collections import deque
+from const import DEFAULT_ITERATIONS
 
-DEFAULT_ITERATIONS = 200_000
+#Variables globales para la función type_text
 typing_after_id = None
-
 typing_after_id = None
 typing_queue = deque()
 
+# Genera el hash de la contraseña introducida por el usuario
+def hash_password(password: str, salt_password: bytes = None) -> tuple:
+    if salt_password is None:
+        salt_password = os.urandom(16) #El salt se genera aleatoriamente
+    
+    value = salt_password + (password).encode("utf-8") #Aplicamos salt (distinto al que se usa para obtener la clave de usuario)
+
+    for _ in range(DEFAULT_ITERATIONS):
+        #Iteramos para que sea más difícil un ataque a fuerza brutas
+        value = hashlib.sha256(value).digest()
+    
+
+    return (
+        base64.b64encode(salt_password).decode("ascii"),
+        base64.b64encode(os.urandom(16)).decode("ascii"), #salt_key (salt para construir la clave de usuario)
+        base64.b64encode(value).decode("ascii")
+    )
+
+#Genera una clave a partir de la contraseña de cada usuario -> todos los datos del usuario se cifran con esta clave
 def generate_user_key(password: str, salt: bytes) -> bytes:
+    #Se le aplica un salt aleatorio para añadir seguridad (este salt es distinto al que se aplica al hash de la contraseña)
     value = salt + (password).encode("utf-8")
     for _ in range(DEFAULT_ITERATIONS):
+        #Iteramos para que sea más difícil un ataque a fuerza brutas
         value = hashlib.sha256(value).digest()
-    return value  # 32 bytes → clave AES-256
 
-def desencrypt_data(file_bytes, msg_key, terminal):
+    return value  # Retornamos la clave AES-256 de 32 bytes
+
+# Funciones de encriptar y desencriptar proporcionando una clave
+def desencrypt_data(file_bytes, key, terminal):
+    # Obtenemos el nonce, tag y el texto cifrado
     nonce = file_bytes[:16]
     tag = file_bytes[16:32]
     ciphertext = file_bytes[32:]
-    cipher = AES.new(msg_key, AES.MODE_GCM, nonce=nonce)
-    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+
+    # Nos aseguramos de que el tag sea el mismo de cuando se cifró ya que si no, significa que alguien ha modificado el documento
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag) 
     type_text(terminal, 
         "Desencriptando archivo del usuario...\n"
         f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
         f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
         f"Verificación MAC exitosa\n"
-        f"Desencriptación con AES-256 GCM exitosa                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
+        f"Desencriptación con AES-256 GCM exitosa\n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
     
-    return json.loads(plaintext.decode("utf-8"))
+    return json.loads(plaintext.decode("utf-8")) # Se devuelve el texto ya desencriptado
 
-def encrypt_data(msg_key, plaintext):
-    cipher = AES.new(msg_key, AES.MODE_GCM)
+def encrypt_data(key, plaintext):
+    # A partir de una clave y un texto (en bits) se encripta
+    cipher = AES.new(key, AES.MODE_GCM)
     ciphertext, tag = cipher.encrypt_and_digest(plaintext)
-    return cipher,ciphertext,tag
+    return cipher,ciphertext,tag #Devolvemos la información adicional para guardarla luego
 
 
+# Funciones load/store pero antes de guardar/cargar tienen que encriptar/desencriptar
 def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
     try:
         with open(filepath, "rb") as f:
@@ -46,15 +74,14 @@ def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
         return desencrypt_data(file_bytes, key, terminal)
 
     except ValueError:
-        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀\n")
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀\n") #Eso significa que la autenticación ha fallado.
         return None
     
 
 def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
-    plaintext = json.dumps(data).encode("utf-8")  # de dict → bytes
+    plaintext = json.dumps(data).encode("utf-8") 
     cipher, ciphertext, tag = encrypt_data(key, plaintext)
     
-
     # Guardamos nonce + tag + ciphertext en binario
     with open(filepath, "wb") as f:
         f.write(cipher.nonce + tag + ciphertext)
@@ -65,13 +92,10 @@ def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
                   f"Usada clave para AES-GCM de 32 bytes... \n"
                   f"Generado tag de autenticacion {base64.b64encode(tag).decode("ascii")}\n"
                   f"Encriptación con AES-256 GCM exitosa\n"
-                  "Datos del usuario guardados correctamente                         \n") 
+                  "Datos del usuario guardados correctamente\n") 
 
-
-
-### Normales
+#Funcion load/store estandar (para cuando no hay que usar nada de cifrado)
 def load_data(path: str) -> dict:
-    """Carga y devuelve el diccionario de usuarios desde users.json."""
     try:
         with open(path, "r", encoding="utf-8", newline="") as file:
             users = json.load(file)
@@ -82,33 +106,30 @@ def load_data(path: str) -> dict:
     return users
 
 def store_data(data: dict, path: str):
-    """Guarda el diccionario de usuarios en users.json de forma atómica."""
     try:
         with open(path, "w", encoding="utf-8", newline="") as file:
                 json.dump(data, file, indent=2)
     except json.JSONDecodeError:
         raise Exception("Error guardando el archivo\n")
 
+
+#Función que se encarga de imprimir por la terminal de la ventana de tkinter
+#Delay -> como de lento escribe
 def type_text(terminal, text, delay=3, index=0):
-    """
-    Escribe el texto en el terminal letra a letra usando una cola.
-    """
+    #Escribe el texto en el terminal letra a letra usando una cola.
     global typing_after_id, typing_queue
 
-    # Si estamos empezando un nuevo texto (index == 0)
     if index == 0:
-        # Si ya hay un texto escribiéndose, añadimos a la cola y salimos
+        # Añadimos a la cola y salimos
         if typing_after_id is not None:
             typing_queue.append(text)
             return
         
-    # Escribimos el texto
     if index < len(text):
         terminal.insert(tk.END, text[index])
         terminal.see(tk.END)
         typing_after_id = terminal.after(delay, type_text, terminal, text, delay, index + 1, )
     else:
-        # Terminamos este texto
         terminal.insert(tk.END, "\n")
         typing_after_id = None
         
@@ -117,22 +138,23 @@ def type_text(terminal, text, delay=3, index=0):
             next_text = typing_queue.popleft()
             type_text(terminal, next_text, delay, 0)
 
+# Funciones para comprobar la existencia de algo
 def user_exists(username: str, user_file) -> bool:
     users = load_data(user_file)
     return username in users
 
-def hash_password(password: str, salt_password: bytes = None) -> tuple:
-    if salt_password is None:
-        salt_password = os.urandom(16) #bytes
-    
-    value = salt_password + (password).encode("utf-8") #bytes
 
-    for _ in range(DEFAULT_ITERATIONS):
-        value = hashlib.sha256(value).digest()
-    ## digest devuelve bytes crudos, luego lo pasas a hexadecimal y a ascii para poder meterlo en el json.
+def car_exists(model:str, user_data:dict):
+    car_pos = 0
+    for car in user_data["garage"]:
+        if car["model"] == model:
+            return True, car_pos
+        else:
+            car_pos +=1
+    return False, car_pos
 
-    return (
-        base64.b64encode(salt_password).decode("ascii"),
-        base64.b64encode(os.urandom(16)).decode("ascii"), #salt_key
-        base64.b64encode(value).decode("ascii")
-    )
+def upgrade_exists(upgrade:str, user_data:dict, car_pos:int):
+    for upgrade in user_data["garage"][car_pos]:
+        if upgrade["name"] == upgrade:
+                    return True
+    return False

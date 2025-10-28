@@ -4,7 +4,6 @@ import random
 from const import RACES_PATH, USERS_PATH
 from shop import car_exists
 from utility_functions import desencrypt_data, encrypt_data, load_encrypted_data, store_encrypted_data, type_text, user_exists
-import tkinter as tk
 from utility_functions import load_data, store_data, type_text
 
 selected_race = 0
