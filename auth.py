@@ -266,7 +266,8 @@ def register_user(username: str, password: str, terminal):
     f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
     "Clave del usuario generada correctamente...\n"
-    "Datos registrados correctamente!\n"))
+    "Datos registrados correctamente!\n"
+    "\n"))
 
     # Generamos clave a partir de la contraseña del usuario y encriptamos
     user_key = generate_user_key(password, base64.b64decode(salt_key))

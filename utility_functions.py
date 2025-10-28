@@ -43,21 +43,27 @@ def generate_user_key(password: str, salt: bytes) -> bytes:
 # Funciones de encriptar y desencriptar proporcionando una clave
 def desencrypt_data(file_bytes, key, terminal):
     # Obtenemos el nonce, tag y el texto cifrado
-    nonce = file_bytes[:16]
-    tag = file_bytes[16:32]
-    ciphertext = file_bytes[32:]
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    try:
+        nonce = file_bytes[:16]
+        tag = file_bytes[16:32]
+        ciphertext = file_bytes[32:]
+        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
 
-    # Nos aseguramos de que el tag sea el mismo de cuando se cifró ya que si no, significa que alguien ha modificado el documento
-    plaintext = cipher.decrypt_and_verify(ciphertext, tag) 
-    type_text(terminal, 
-        "Desencriptando archivo del usuario...\n"
-        f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
-        f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
-        f"Verificación MAC exitosa\n"
-        f"Desencriptación con AES-256 GCM exitosa\n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
-    
-    return json.loads(plaintext.decode("utf-8")) # Se devuelve el texto ya desencriptado
+        # Nos aseguramos de que el tag sea el mismo de cuando se cifró ya que si no, significa que alguien ha modificado el documento
+        plaintext = cipher.decrypt_and_verify(ciphertext, tag) 
+        type_text(terminal, 
+            "Desencriptando archivo del usuario...\n"
+            f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
+            f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
+            f"Verificación MAC exitosa\n"
+            f"Desencriptación con AES-256 GCM exitosa\n"
+            "\n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
+        
+        return json.loads(plaintext.decode("utf-8")) # Se devuelve el texto ya desencriptado
+    except ValueError:
+        #Eso significa que la autenticación ha fallado o que las claves no son las mismas
+        type_text(terminal, "ERROR GRAVE: las claves de cifrado y descifrado no coinciden o alguien ha modificado el archivo\n") 
+        return None
 
 def encrypt_data(key, plaintext):
     # A partir de una clave y un texto (en bits) se encripta
@@ -68,14 +74,9 @@ def encrypt_data(key, plaintext):
 
 # Funciones load/store pero antes de guardar/cargar tienen que encriptar/desencriptar
 def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
-    try:
-        with open(filepath, "rb") as f:
-            file_bytes = f.read()
-        return desencrypt_data(file_bytes, key, terminal)
-
-    except ValueError:
-        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀\n") #Eso significa que la autenticación ha fallado.
-        return None
+    with open(filepath, "rb") as f:
+        file_bytes = f.read()
+    return desencrypt_data(file_bytes, key, terminal)
     
 
 def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
@@ -92,7 +93,8 @@ def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
                   f"Usada clave para AES-GCM de 32 bytes... \n"
                   f"Generado tag de autenticacion {base64.b64encode(tag).decode("ascii")}\n"
                   f"Encriptación con AES-256 GCM exitosa\n"
-                  "Datos del usuario guardados correctamente\n") 
+                  "Datos del usuario guardados correctamente\n"
+                  "\n") 
 
 #Funcion load/store estandar (para cuando no hay que usar nada de cifrado)
 def load_data(path: str) -> dict:
@@ -115,7 +117,7 @@ def store_data(data: dict, path: str):
 
 #Función que se encarga de imprimir por la terminal de la ventana de tkinter
 #Delay -> como de lento escribe
-def type_text(terminal, text, delay=3, index=0):
+def type_text(terminal, text, delay=2, index=0):
     #Escribe el texto en el terminal letra a letra usando una cola.
     global typing_after_id, typing_queue
 
@@ -154,7 +156,7 @@ def car_exists(model:str, user_data:dict):
     return False, car_pos
 
 def upgrade_exists(upgrade:str, user_data:dict, car_pos:int):
-    for upgrade in user_data["garage"][car_pos]:
+    for upgrade in user_data["garage"][car_pos]["upgrades"]:
         if upgrade["name"] == upgrade:
                     return True
     return False

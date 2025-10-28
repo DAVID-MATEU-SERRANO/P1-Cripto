@@ -1,6 +1,6 @@
 from utility_functions import car_exists, load_encrypted_data, store_encrypted_data, type_text, upgrade_exists
 from utility_functions import type_text
-
+import tkinter as tk
 ### Variables globales
 selected_car = 0
 selected_upgrade = 0
@@ -9,6 +9,7 @@ selected_upgrade = 0
 # Imprimir el coche
 def type_car(car_data:list, terminal):
     global selected_car
+    terminal.delete("1.0", tk.END)
     type_text(terminal, 
     f"""
     --- {car_data[selected_car]["brand"]} {car_data[selected_car]["model"]} ---
@@ -38,7 +39,7 @@ def previous_car(car_data:list, terminal):
 #Compra del coche
 def buy_car(car_data:list, user_path:str, terminal, user_key):
     global selected_car
-    print(user_path)
+    terminal.delete("1.0", tk.END)
     # Tenemos que cargar los datos del usuario para las comprobaciones
     user_data = load_encrypted_data(user_path, user_key, terminal)
     if not user_data:
@@ -62,6 +63,7 @@ def buy_car(car_data:list, user_path:str, terminal, user_key):
 ### Funciones auxiliares compra mejoras
 def type_upgrade(upgrade_data:list, terminal):
     global selected_upgrade
+    terminal.delete("1.0", tk.END)
     type_text(terminal, 
     f"""
     --- {upgrade_data[selected_upgrade]["name"]} ---
@@ -90,6 +92,7 @@ def previous_upgrade(upgrade_data:list, terminal):
     
 def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, user_key):
     global selected_upgrade
+    terminal.delete("1.0", tk.END)
     # Hay que cargar los datos del usuario para comprobaciones y para actualizarlos en caso necesario
     user_data = load_encrypted_data(user_path, user_key, terminal)
     # Comprobaciones previas (el coche debe estar en el garage del usuario y no contener la mejora)

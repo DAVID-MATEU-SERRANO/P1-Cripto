@@ -611,7 +611,7 @@ def show_available_races(user_path:str, user_name:str, user_key):
     tk.Button(
             root_available_races,
             text="MOSTRAR CARRERAS",
-            command=lambda: [type_race(user_name, terminal, user_key, msg_key_entry.get().encode("utf-8"))],
+            command=lambda: [type_race(user_name, terminal, msg_key_entry.get().encode("utf-8"))],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -627,7 +627,7 @@ def show_available_races(user_path:str, user_name:str, user_key):
     tk.Button(
             root_available_races,
             text="SIGUIENTE CARRERA",
-            command=lambda: [next_race(user_name, terminal, user_key)],
+            command=lambda: [next_race(user_name, terminal, msg_key_entry.get().encode("utf-8"))],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -643,7 +643,7 @@ def show_available_races(user_path:str, user_name:str, user_key):
     tk.Button(
             root_available_races,
             text="ANTERIOR CARRERA",
-            command=lambda: [previous_race(user_name, terminal, user_key)],
+            command=lambda: [previous_race(user_name, terminal, msg_key_entry.get().encode("utf-8"))],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
