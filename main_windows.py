@@ -532,11 +532,13 @@ def show_propose_race(user_path:str, user_name:str, user_key):
     tk.Label(root_propose_race, text="COCHE (elige uno de tus coches para correr)", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
     race_car_entry = tk.Entry(root_propose_race, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
     race_car_entry.pack(pady=(0, 0))
+    msg_key_entry = tk.Entry(root_propose_race, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    msg_key_entry.pack(pady=(0, 0))
 
     tk.Button(
             root_propose_race,
             text="ENVIAR CARRERA",
-            command=lambda: [send_race(rival_username_entry.get(), race_car_entry.get(), user_name, terminal, user_path, user_key)],
+            command=lambda: [send_race(rival_username_entry.get(), race_car_entry.get(), user_name, terminal, user_path, user_key, msg_key_entry.get().encode("utf-8"))],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -629,11 +631,30 @@ def show_available_races(user_path:str, user_name:str, user_key):
     tk.Label(root_available_races, text="COCHE (elige uno de tus coches para correr)", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
     race_car_entry = tk.Entry(root_available_races, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
     race_car_entry.pack(pady=(0, 0))
+    msg_key_entry = tk.Entry(root_available_races, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    msg_key_entry.pack(pady=(0, 0))
 
     tk.Button(
             root_available_races,
             text="INICIAR CARRERA",
-            command=lambda: [race(user_name, user_path, user_key, terminal, race_car_entry.get())],
+            command=lambda: [race(user_name, user_path, user_key, terminal, race_car_entry.get(), msg_key_entry.get().encode("utf-8")
+)],
+            fg="white",
+            bg="#ac3333",
+            activebackground="#bd6c6c",
+            activeforeground="white",
+            font=button_font,
+            relief="flat",
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor="hand2"
+        ).pack(pady=(40, 0))
+    
+    tk.Button(
+            root_available_races,
+            text="MOSTRAR CARRERAS",
+            command=lambda: [type_race(user_name, terminal, user_key, msg_key_entry.get().encode("utf-8"))],
             fg="white",
             bg="#ac3333",
             activebackground="#bd6c6c",
@@ -665,6 +686,5 @@ def show_available_races(user_path:str, user_name:str, user_key):
     terminal = tk.Text(root_available_races, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
-    type_race(user_name, terminal, user_key)
 
     root_available_races.mainloop()

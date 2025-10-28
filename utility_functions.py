@@ -18,35 +18,41 @@ def generate_user_key(password: str, salt: bytes) -> bytes:
         value = hashlib.sha256(value).digest()
     return value  # 32 bytes → clave AES-256
 
+def desencrypt_data(file_bytes, msg_key, terminal):
+    nonce = file_bytes[:16]
+    tag = file_bytes[16:32]
+    ciphertext = file_bytes[32:]
+    cipher = AES.new(msg_key, AES.MODE_GCM, nonce=nonce)
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+    type_text(terminal, 
+        "Desencriptando archivo del usuario...\n"
+        f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
+        f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
+        f"Verificación MAC exitosa\n"
+        f"Desencriptación con AES-256 GCM exitosa                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
+    
+    return json.loads(plaintext.decode("utf-8"))
+
+def encrypt_data(msg_key, plaintext):
+    cipher = AES.new(msg_key, AES.MODE_GCM)
+    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+    return cipher,ciphertext,tag
+
 
 def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
     try:
         with open(filepath, "rb") as f:
             file_bytes = f.read()
+        return desencrypt_data(file_bytes, key, terminal)
 
-        nonce = file_bytes[:16]
-        tag = file_bytes[16:32]
-        ciphertext = file_bytes[32:]
-
-        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-        plaintext = cipher.decrypt_and_verify(ciphertext, tag)
-        type_text(terminal, 
-                  "Desencriptando archivo del usuario...\n"
-                  f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
-                  f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
-                  f"Verificación MAC exitosa\n"
-                  f"Desencriptación con AES-256 GCM exitosa                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
-        return json.loads(plaintext.decode("utf-8"))
-    
-    except ValueError as e:
+    except ValueError:
         type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀\n")
         return None
     
 
 def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
     plaintext = json.dumps(data).encode("utf-8")  # de dict → bytes
-    cipher = AES.new(key, AES.MODE_GCM)
-    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+    cipher, ciphertext, tag = encrypt_data(key, plaintext)
     
 
     # Guardamos nonce + tag + ciphertext en binario
@@ -59,7 +65,9 @@ def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
                   f"Usada clave para AES-GCM de 32 bytes... \n"
                   f"Generado tag de autenticacion {base64.b64encode(tag).decode("ascii")}\n"
                   f"Encriptación con AES-256 GCM exitosa\n"
-                  "Datos del usuario guardados correctamente                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
+                  "Datos del usuario guardados correctamente                         \n") 
+
+
 
 ### Normales
 def load_data(path: str) -> dict:
