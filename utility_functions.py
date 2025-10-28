@@ -1,3 +1,4 @@
+#utility_functions.py
 import json
 import tkinter as tk
 from Crypto.Cipher import AES
@@ -156,7 +157,7 @@ def car_exists(model:str, user_data:dict):
     return False, car_pos
 
 def upgrade_exists(upgrade:str, user_data:dict, car_pos:int):
-    for upgrade in user_data["garage"][car_pos]["upgrades"]:
-        if upgrade["name"] == upgrade:
+    for up in user_data["garage"][car_pos]["upgrades"]:
+        if up["name"] == upgrade:
                     return True
     return False

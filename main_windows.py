@@ -1,3 +1,4 @@
+#main_windows.py
 from tkinter import font as tkfont
 import tkinter as tk
 from const import CARS_SHOP_PATH, UPGRADES_SHOP_PATH

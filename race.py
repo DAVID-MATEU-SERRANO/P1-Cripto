@@ -1,3 +1,4 @@
+#race.py
 import base64
 import json
 import random
@@ -31,7 +32,6 @@ def create_race(rival, race_car_data, user_name, terminal, msg_key):
 
 # Se encarga de la lógica de enviar el mensaje (comprobaciones previas y cargar el coche que se quiere enviar)
 def send_race(rival:str, race_car:str, user_name:str, terminal, user_path, user_key, msg_key):
-    print(len(msg_key))
     if rival == "" or race_car == "":
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
@@ -58,13 +58,13 @@ def send_race(rival:str, race_car:str, user_name:str, terminal, user_path, user_
 def type_race(user_name, terminal, msg_key):
     global selected_race
     terminal.delete("1.0", tk.END)
-    if len(msg_key) != 32:
-        type_text(terminal, "La clave de descifrado debe tener 32 caracteres y debe ser la misma que la de cifrado\n")
-        return 
-    
     if not msg_key:
         type_text(terminal, "Por favor introduzca la clave de cifrado\n")
         return
+    
+    if len(msg_key) != 32:
+        type_text(terminal, "La clave de descifrado debe tener 32 caracteres y debe ser la misma que la de cifrado\n")
+        return 
 
     race_path = RACES_PATH + f"{user_name}" + "_races.json" 
 
