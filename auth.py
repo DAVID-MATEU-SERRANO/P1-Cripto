@@ -255,7 +255,7 @@ def register_user(username: str, password: str, terminal):
     user_data = load_data(USER_DATA_PATH)
     user_data["username"] = username
     user_data["garage"] = []
-    user_data["points"] = 10000000
+    user_data["points"] = 200
 
     terminal.delete("1.0", tk.END)
     type_text(terminal, (
