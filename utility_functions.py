@@ -89,7 +89,7 @@ def store_data(data: dict, path: str):
     except json.JSONDecodeError:
         raise Exception("Error guardando el archivo\n")
 
-def type_text(terminal, text, index=0, delay=10):
+def type_text(terminal, text, delay=3, index=0):
     """
     Escribe el texto en el terminal letra a letra usando una cola.
     """
@@ -101,15 +101,12 @@ def type_text(terminal, text, index=0, delay=10):
         if typing_after_id is not None:
             typing_queue.append(text)
             return
-        else:
-            # Si no hay texto en curso, limpiamos el terminal
-            terminal.delete("1.0", tk.END)
-
+        
     # Escribimos el texto
     if index < len(text):
         terminal.insert(tk.END, text[index])
         terminal.see(tk.END)
-        typing_after_id = terminal.after(delay, type_text, terminal, text, index + 1, delay)
+        typing_after_id = terminal.after(delay, type_text, terminal, text, delay, index + 1, )
     else:
         # Terminamos este texto
         terminal.insert(tk.END, "\n")
@@ -118,7 +115,7 @@ def type_text(terminal, text, index=0, delay=10):
         # Si hay mensajes en la cola, procesamos el siguiente
         if typing_queue:
             next_text = typing_queue.popleft()
-            type_text(terminal, next_text, 0, delay)
+            type_text(terminal, next_text, delay, 0)
 
 def user_exists(username: str, user_file) -> bool:
     users = load_data(user_file)

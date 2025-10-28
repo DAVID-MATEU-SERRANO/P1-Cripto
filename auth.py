@@ -1,8 +1,5 @@
 # auth.py
-import os
-import hashlib
 import base64
-from time import sleep
 import tkinter as tk
 from tkinter import font as tkfont
 from const import DEFAULT_ITERATIONS, USERS_PATH
@@ -11,9 +8,9 @@ import re
 from main_windows import show_secondary_menu
 
 
-
-#### SHOW WINDOWS ####
+#-- SHOW WINDOWS AUTHENTICATION --
 def show_initial_window():
+    #General
     root_initial = tk.Tk()
     root_initial.title("CryptoRacers")
     root_initial.resizable(False, False)
@@ -30,7 +27,10 @@ def show_initial_window():
     root_initial.geometry(f"{width}x{height}+{x}+{y}")
     root_initial.configure(bg="#191919")
 
+    #Fuentes
     title_font = tkfont.Font(family="Impact", size=70, weight="bold")
+
+    #Elementos
     tk.Label(root_initial, text="CRYPTO", fg="white", bg="#191919", font=title_font).pack(pady=(10, 0))
     tk.Label(root_initial, text="RACERS", fg="#ff0000", bg="#191919", font=title_font).pack()
 
@@ -72,11 +72,11 @@ def show_initial_window():
     root_initial.mainloop()
 
 def show_login_window():
+    #General
     root_login = tk.Tk()
-    root_login.title("Login CryptoRacers")
+    root_login.title("Inicio Sesión CryptoRacers")
     root_login.resizable(False, False)
 
-    # Tamaño y centrado
     width = 800
     height = 600
     screen_width = root_login.winfo_screenwidth()
@@ -86,14 +86,14 @@ def show_login_window():
     root_login.geometry(f"{width}x{height}+{x}+{y}")
     root_login.configure(bg="#191919")
 
-    # --- Estilo general ---
-    title_font = tkfont.Font(family="Impact", size=70, weight="bold")
+    # Fuentes
+    title_font = tkfont.Font(family="Impact", size=50, weight="bold")
     label_font = tkfont.Font(family="Consolas", size=17, weight="bold")
     button_font = tkfont.Font(family="Consolas", size=12, weight="bold")
-    # --- Título estilo "CryptoRacers" ---
+
+    # Elementos
     tk.Label(root_login, text="INICIO SESIÓN", fg="white", bg="#191919", font=title_font).pack(pady=(10, 10))
 
-    # --- Campos de usuario y contraseña ---
     tk.Label(root_login, text="USUARIO", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
     username_entry = tk.Entry(root_login, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
     username_entry.pack(pady=(0, 20))
@@ -134,7 +134,6 @@ def show_login_window():
             cursor="hand2"
         ).pack(pady=(20, 30))
 
-    # --- Área tipo terminal ---
     terminal = tk.Text(root_login, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
@@ -144,11 +143,11 @@ def show_login_window():
 
 
 def show_register_window():
+    #General
     root_register = tk.Tk()
-    root_register.title("Register CryptoRacers")
+    root_register.title("Registro CryptoRacers")
     root_register.resizable(False, False)
 
-    # Tamaño y centrado
     width = 800
     height = 600
     screen_width = root_register.winfo_screenwidth()
@@ -158,14 +157,14 @@ def show_register_window():
     root_register.geometry(f"{width}x{height}+{x}+{y}")
     root_register.configure(bg="#191919")
 
-    # --- Estilo general ---
-    title_font = tkfont.Font(family="Impact", size=70, weight="bold")
+    # Fuentes
+    title_font = tkfont.Font(family="Impact", size=50, weight="bold")
     label_font = tkfont.Font(family="Consolas", size=17, weight="bold")
     button_font = tkfont.Font(family="Consolas", size=12, weight="bold")
-    # --- Título estilo "CryptoRacers" ---
+
+    #Elementos
     tk.Label(root_register, text="REGISTRO", fg="white", bg="#191919", font=title_font).pack(pady=(10, 10))
 
-    # --- Campos de usuario y contraseña ---
     tk.Label(root_register, text="USUARIO", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
     username_entry = tk.Entry(root_register, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
     username_entry.pack(pady=(0, 20))
@@ -206,7 +205,6 @@ def show_register_window():
             cursor="hand2"
         ).pack(pady=(20, 30))
 
-    # --- Área tipo terminal ---
     terminal = tk.Text(root_register, width=70, bg="#0e0e0e", fg="#29FFF4",
                        insertbackground="white", font=("Consolas", 11), relief="flat")
     terminal.pack(pady=(0, 20))
@@ -215,30 +213,35 @@ def show_register_window():
     root_register.mainloop()
 
 
-### REGISTER AND LOGIN FUNCTIONS ###
+#-- REGISTER AND LOGIN FUNCTIONS -- (tienen que ir aqui para no crear imports circulares -> login destruye y crea una nueva ventana)
 def register_user(username: str, password: str, terminal):
+    # Comprobaciones iniciales
     if password == "" or username == "":
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
     if user_exists(username, USERS_PATH):
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "El usuario ya existe\nIntroduzca uno distinto\n")
         return
 
     username_regex = re.compile(r'^(?=.*[a-zA-Z]).{5,}$')
     if not username_regex.match(username):
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "Debe introducir un nombre de usuario válido\nEl nombre de usuario debe tener longitud mínima de 5 y contener al menos 1 letra\n")
         return
     
     password_regex = re.compile(r'^(?=.{12,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
     if not password_regex.match(password):
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) y tener una longitud mínima de 12")
         return 
 
-
+    # Generamos hash password
     salt_password, salt_key, hash_b64 = hash_password(password)
 
-
+    # Añadimos los datos del usuario a users.json
     users_auth = load_data(USERS_PATH)
     users_auth[username] = {
         "salt_password": salt_password,
@@ -247,15 +250,14 @@ def register_user(username: str, password: str, terminal):
     }
     store_data(users_auth, USERS_PATH)
 
+    # Añadimos los datos iniciales del usuario a username_data.json (irán cifrados)
     USER_DATA_PATH = f"User_data/{username}_data.json"
     user_data = load_data(USER_DATA_PATH)
     user_data["username"] = username
     user_data["garage"] = []
     user_data["points"] = 10000000
 
-    user_key = generate_user_key(password, base64.b64decode(salt_key))
-    store_encrypted_data(user_data, USER_DATA_PATH, user_key, terminal)
-
+    terminal.delete("1.0", tk.END)
     type_text(terminal, (
     f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
@@ -266,16 +268,26 @@ def register_user(username: str, password: str, terminal):
     "Clave del usuario generada correctamente...\n"
     "Datos registrados correctamente!\n"))
 
+    # Generamos clave a partir de la contraseña del usuario y encriptamos
+    user_key = generate_user_key(password, base64.b64decode(salt_key))
+    store_encrypted_data(user_data, USER_DATA_PATH, user_key, terminal)
+
+
+
 
 def login_user(username: str, password: str, terminal, root):
+    # Comprobaciones iniciales
     if password == "" or username == "":
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "Complete todos los campos por favor\n")
         return 
     
     if not user_exists(username, USERS_PATH):
+        terminal.delete("1.0", tk.END)
         type_text(terminal, "Usuario no encontrado\nIntroduzca uno que esté registrado\n")
         return
 
+    # Recuperamos salt para calcular el nuevo hash y ver si coincide con la contraseña introducida por el usuario
     users = load_data(USERS_PATH)
     user_data = users[username]
     salt_password = user_data["salt_password"]
@@ -291,8 +303,7 @@ def login_user(username: str, password: str, terminal, root):
         show_secondary_menu(USER_DATA_PATH, username, user_key)
         return
     else:
+        terminal.delete("1.0", tk.END)
         type_text(terminal, f"Los hashes no coinciden\nHash calculado -> {computed_hash}\nHash almacenado -> {stored_hash}\nContraseña incorrecta\nInténtelo de nuevo :(\n")
         return
 
-
-### AUXILIARY FUNCTIONS ###

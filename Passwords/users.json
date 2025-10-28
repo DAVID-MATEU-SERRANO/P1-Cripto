@@ -1,12 +1,37 @@
 {
   "user1": {
-    "salt_password": "YMOJPx+jzd3yojD+St34lQ==",
-    "salt_key": "vN4S5wVj5QxT3SQXKMY0Nw==",
-    "hash": "IERyWdynafg/fE3m/j3WAaF/1cQqo/V20ztHihcJlp0="
+    "salt_password": "HVug0eUyb31dXssrZkVx2g==",
+    "salt_key": "WErK2DbgI+8qGv1mxKzEpg==",
+    "hash": "C0w6dAb9QHXGWtqkzTUsnYmxFdjJfuzUoQs+OuqDqWY="
   },
-  "usuario2": {
-    "salt_password": "nD1fWJ9bzzM74A7X6faFhw==",
-    "salt_key": "uzcWXuTEvkTz/CXxstiG6A==",
-    "hash": "SFJ59tnxS5Ypcs7KkQD2GhoWw2afltgb0BPwxAsccqw="
+  "user2": {
+    "salt_password": "2+nh/8O2wQpCBRI1WXVg2A==",
+    "salt_key": "O40yDX8h1AsEMzbZQ0yn1w==",
+    "hash": "fNyWRR9WzGsN0eO3DaMD6ySSxmEA4y4BV/G+gcXji0A="
+  },
+  "user3": {
+    "salt_password": "h/MALSILo4SW+VwM7BcqrA==",
+    "salt_key": "NSaPMbXSqEq/2YLnR/+R/A==",
+    "hash": "Cqme0AjhNVvR9hZBwYx+BjW922SbIe/InNLLEjgL0NU="
+  },
+  "user4": {
+    "salt_password": "7o2oM1/v+OwRqFF+VKklNg==",
+    "salt_key": "Tn0zu21v9CNLhbB9ChM+ug==",
+    "hash": "YfC/A/8p1oAa99pPkbqs/kYT8bGv/zpFQh/r0NEBPP8="
+  },
+  "user5": {
+    "salt_password": "7TlBJ08p63tA3v9JN7Uk7Q==",
+    "salt_key": "o+d7i8QTQ12DCc/+4TCbSQ==",
+    "hash": "wTiC5tF1iwLVcR2gORxtDUuESxR/hntEQqUvaJBg2vg="
+  },
+  "user6": {
+    "salt_password": "sOxvdMLm/EJmRgWbL7HqHg==",
+    "salt_key": "JXROaK7DyS+JGwOE7mx+2g==",
+    "hash": "Mq0ZBK1Thh170nhOuZxLfW12cZjvvTdrguJ7fN8wNck="
+  },
+  "user7": {
+    "salt_password": "CDOzzoj275x7BHxBm/ekaw==",
+    "salt_key": "xUJAAI9bBRmPrt6BvaN2GQ==",
+    "hash": "5ViY60ZnmOVmv8bpnzG82Dla4ix3+JtYjCicAmDfyuM="
   }
 }

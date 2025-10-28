@@ -575,7 +575,7 @@ def show_propose_race(user_path:str, user_name:str, user_key):
 
 def show_available_races(user_path:str, user_name:str, user_key):
     root_available_races = tk.Tk()
-    root_available_races.title("Login CryptoRacers")
+    root_available_races.title("Inicio Sesión CryptoRacers")
     root_available_races.resizable(False, False)
 
     # Tamaño y centrado
