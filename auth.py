@@ -74,7 +74,7 @@ def show_initial_window():
 def show_login_window():
     #General
     root_login = tk.Tk()
-    root_login.title("Inicio Sesión CryptoRacers")
+    root_login.title("CryptoRacers")
     root_login.resizable(False, False)
 
     width = 800
@@ -145,7 +145,7 @@ def show_login_window():
 def show_register_window():
     #General
     root_register = tk.Tk()
-    root_register.title("Registro CryptoRacers")
+    root_register.title("CryptoRacers")
     root_register.resizable(False, False)
 
     width = 800
