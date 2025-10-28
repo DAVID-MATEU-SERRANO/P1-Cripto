@@ -33,24 +33,18 @@ def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
         plaintext = cipher.decrypt_and_verify(ciphertext, tag)
         type_text(terminal, 
                   "Desencriptando archivo del usuario...\n"
-                  f"Nonce extraído: {len(nonce)} bytes \n"
-                  f"Tag de autenticidad extraído: {len(tag)} bytes\n"
+                  f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
+                  f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
                   f"Verificación MAC exitosa\n"
-                  f"Desencriptación con AES-256 GCM exitosa\n")
+                  f"Desencriptación con AES-256 GCM exitosa                         \n")
         return json.loads(plaintext.decode("utf-8"))
     
     except ValueError as e:
-        # Aquí es donde cae la verificación de autenticidad (MAC check failed)
-        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
+        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀\n")
         return None
+    
 
 def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
-    type_text(terminal, 
-                  "Encriptando archivo del usuario...\n"
-                  f"Usada clave para AES-GCM de 32 bytes... \n"
-                  f"Encriptación con AES-256 GCM exitosa\n"
-                  "Datos del usuario guardados correctamente\n")
-    
     plaintext = json.dumps(data).encode("utf-8")  # de dict → bytes
     cipher = AES.new(key, AES.MODE_GCM)
     ciphertext, tag = cipher.encrypt_and_digest(plaintext)
@@ -60,7 +54,13 @@ def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
     with open(filepath, "wb") as f:
         f.write(cipher.nonce + tag + ciphertext)
 
-    
+    type_text(terminal, 
+                  "Encriptando archivo del usuario...\n"
+                  f"Usando nonce generado aleatoriamente -> {base64.b64encode(cipher.nonce).decode("ascii")}\n"
+                  f"Usada clave para AES-GCM de 32 bytes... \n"
+                  f"Generado tag de autenticacion {base64.b64encode(tag).decode("ascii")}\n"
+                  f"Encriptación con AES-256 GCM exitosa\n"
+                  "Datos del usuario guardados correctamente                         \n")
 
 ### Normales
 def load_data(path: str) -> dict:
@@ -84,7 +84,7 @@ def store_data(data: dict, path: str):
     except json.JSONDecodeError:
         raise Exception("Error guardando el archivo\n")
 
-def type_text(terminal, text, index=0, delay=5):
+def type_text(terminal, text, index=0, delay=10):
     """
     Escribe el texto en el terminal letra a letra usando una cola.
     """

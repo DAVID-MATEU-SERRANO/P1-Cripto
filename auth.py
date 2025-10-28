@@ -172,7 +172,7 @@ def show_register_window():
     username_entry.pack(pady=(0, 20))
 
     tk.Label(root_register, text="CONTRASEÑA", fg="#FF0000", bg="#191919", font=label_font).pack(pady=(10, 5))
-    password_entry = tk.Entry(root_register, show="*", font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
+    password_entry = tk.Entry(root_register, font=("Consolas", 12), justify="center", bg="#2c2c2c", fg="white", insertbackground="white", relief="flat", width=30)
     password_entry.pack(pady=(0, 0))
 
     tk.Button(

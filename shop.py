@@ -45,7 +45,6 @@ def buy_car(car_data:list, user_path:str, terminal, user_key):
     print(user_path)
     user_data = load_encrypted_data(user_path, user_key, terminal)
     if not user_data:
-        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
         return
     if car_exists(car_data[selected_car]["model"], user_data):
         type_text(terminal, "Ya has comprado este coche.\nElige otro\n")
@@ -100,7 +99,6 @@ def buy_upgrade(upgrade_data:list, terminal, user_path:str, car_selected:str, us
     global selected_upgrade
     user_data = load_encrypted_data(user_path, user_key, terminal)
     if not user_data:
-        type_text(terminal, "ERROR GRAVE: tus datos han sido modificados desde la última vez que se encriptaron 💀")
         return
     if car_selected == "":
         type_text(terminal, "Indique el coche al que quiere instalar la mejora\n")

@@ -1,7 +1,17 @@
 {
   "mateu": {
-    "salt_password": "YajeO1iErt2DFx8KgyTS3Q==",
-    "salt_key": "AX4NY+X638CmKK12sbymWg==",
-    "hash": "qu9TG7RlF8I4gHoUkxOSvdv7DHN241AEKxvBPNQRw0g="
+    "salt_password": "TWyk7RFkjsjOkWuQ5qq17Q==",
+    "salt_key": "vYZxiRbruuOz92N3OI2fjg==",
+    "hash": "RHvgirxNe0xy/BhP5VMB6Oj+AAaAEWfIPiTYcp+BFDA="
+  },
+  "usuario1": {
+    "salt_password": "flPE3jrQ9xIno3M/ixkL2Q==",
+    "salt_key": "6FryekKxTMGhS69omd7tEQ==",
+    "hash": "PaGoeQ+2c49tcdU6B+R3X9cqGhUSgIO8RCzMcm9CPCg="
+  },
+  "usuario2": {
+    "salt_password": "+QCn1PZNwOBK+L158AIj+g==",
+    "salt_key": "H8RJe3kEy3XuZ/IM06ZrGw==",
+    "hash": "kE3n3iztaZI8I35N+iDxAcF7nZzBIw47S+lw/PJSOaA="
   }
 }
