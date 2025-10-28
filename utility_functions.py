@@ -6,7 +6,6 @@ import hashlib
 import os
 from collections import deque
 
-PEPPER_KEY = "pepper_para_AES"  # distinto del PEPPER de la contraseña
 DEFAULT_ITERATIONS = 200_000
 typing_after_id = None
 
@@ -14,7 +13,7 @@ typing_after_id = None
 typing_queue = deque()
 
 def generate_user_key(password: str, salt: bytes) -> bytes:
-    value = salt + (password + PEPPER_KEY).encode("utf-8")
+    value = salt + (password).encode("utf-8")
     for _ in range(DEFAULT_ITERATIONS):
         value = hashlib.sha256(value).digest()
     return value  # 32 bytes → clave AES-256
@@ -36,7 +35,7 @@ def load_encrypted_data(filepath: str, key: bytes, terminal) -> dict:
                   f"Nonce extraído: {base64.b64encode(nonce).decode('ascii')}\n"
                   f"Tag de autenticidad extraído: {base64.b64encode(tag).decode('ascii')}\n"
                   f"Verificación MAC exitosa\n"
-                  f"Desencriptación con AES-256 GCM exitosa                         \n")
+                  f"Desencriptación con AES-256 GCM exitosa                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
         return json.loads(plaintext.decode("utf-8"))
     
     except ValueError as e:
@@ -60,7 +59,7 @@ def store_encrypted_data(data: dict, filepath: str, key: bytes, terminal):
                   f"Usada clave para AES-GCM de 32 bytes... \n"
                   f"Generado tag de autenticacion {base64.b64encode(tag).decode("ascii")}\n"
                   f"Encriptación con AES-256 GCM exitosa\n"
-                  "Datos del usuario guardados correctamente                         \n")
+                  "Datos del usuario guardados correctamente                         \n") #Los espacios son para q tarde un tiempo en saltar al siguient mensaje en cola
 
 ### Normales
 def load_data(path: str) -> dict:

@@ -11,7 +11,6 @@ from main_windows import show_secondary_menu
 
 DEFAULT_ITERATIONS = 200_000
 USERS_FILE = "Passwords/users.json"
-PEPPER = "practica_crypto_racers"
 
 #### SHOW WINDOWS ####
 def show_initial_window():
@@ -231,9 +230,9 @@ def register_user(username: str, password: str, terminal):
         type_text(terminal, "Debe introducir un nombre de usuario válido\nEl nombre de usuario debe tener longitud mínima de 5 y contener al menos 1 letra\n")
         return
     
-    password_regex = re.compile(r'^(?=.{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
+    password_regex = re.compile(r'^(?=.{12,}$)(?=.*[A-Z])(?=.*\d)(?=.*[_-])\S+$')  
     if not password_regex.match(password):
-        type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) y tener una longitud mínima de 8")
+        type_text(terminal, "Debe introducir una contraseña válida\nEsta debe contener al menos 1 mayúscula, 1 número, un símbolo (-, _) y tener una longitud mínima de 12")
         return 
 
 
@@ -259,12 +258,10 @@ def register_user(username: str, password: str, terminal):
 
     type_text(terminal, (
     f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
-    "Aplicando pepper secreto...\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
     f"Hash SHA-256 de 32 bytes -> {hash_b64} generado correctamente...\n"
     f"Generando clave para AES-GCM de 32 bytes...\n"
     f"Salt de 16 bytes para la contraseña generado y aplicado -> {salt_password}\n"
-    "Aplicando pepper secreto...\n"
     f"Aplicando {DEFAULT_ITERATIONS} iteraciones...\n"
     "Clave del usuario generada correctamente...\n"
     "Datos registrados correctamente!\n"))
@@ -306,10 +303,8 @@ def user_exists(username: str) -> bool:
 def hash_password(password: str, salt_password: bytes = None) -> tuple:
     if salt_password is None:
         salt_password = os.urandom(16) #bytes
-
-    password_peppered = (password + PEPPER).encode("utf-8") #bytes
     
-    value = salt_password + password_peppered #bytes
+    value = salt_password + (password).encode("utf-8") #bytes
 
     for _ in range(DEFAULT_ITERATIONS):
         value = hashlib.sha256(value).digest()
