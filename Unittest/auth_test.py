@@ -10,37 +10,31 @@ import re
 
 sys.path.append('.')
 
-# Importar el módulo a testear
 import auth
 
 class TestAuthFunctions(unittest.TestCase):
 
     def setUp(self):
-        """Configuración antes de cada test"""
         # Crear directorio temporal para pruebas
         self.test_dir = tempfile.mkdtemp()
         self.test_users_path = os.path.join(self.test_dir, "users.json")
         self.test_user_data_path = os.path.join(self.test_dir, "User_data")
         os.makedirs(self.test_user_data_path, exist_ok=True)
         
-        # Configurar paths de prueba
         auth.USERS_PATH = self.test_users_path
         auth.USER_DATA_PATH = self.test_user_data_path
         
-        # Mock del terminal
         self.mock_terminal = Mock()
         self.mock_terminal.delete = Mock()
         
-        # Mock de root (para login)
         self.mock_root = Mock()
         self.mock_root.destroy = Mock()
         
-        # Crear archivo de usuarios vacío
         with open(self.test_users_path, 'w') as f:
             json.dump({}, f)
 
     def tearDown(self):
-        """Limpieza después de cada test"""
+        #Limpieza después de cada test
         import shutil
         shutil.rmtree(self.test_dir)
 
@@ -48,10 +42,8 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_empty_fields(self):
         """Test: Registro con campos vacíos"""
         with patch('auth.type_text') as mock_type_text:
-            # Usuario deja campos vacíos
             auth.register_user("", "", self.mock_terminal)
             
-            # Verificar mensaje de error
             mock_type_text.assert_called_with(
                 self.mock_terminal, 
                 "Complete todos los campos por favor\n"
@@ -59,7 +51,6 @@ class TestAuthFunctions(unittest.TestCase):
 
     def test_register_user_already_exists(self):
         """Test: Registro con usuario que ya existe"""
-        # Crear usuario existente
         with open(self.test_users_path, 'w') as f:
             json.dump({"existing_user": {"salt": "test", "hash": "test"}}, f)
         
@@ -74,7 +65,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_username_short(self):
         """Test: Registro con nombre de usuario muy corto"""
         with patch('auth.type_text') as mock_type_text:
-            # Username demasiado corto
             auth.register_user("user", "ValidPassword123-", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -85,7 +75,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_username_no_letters(self):
         """Test: Registro con nombre de usuario sin letras"""
         with patch('auth.type_text') as mock_type_text:
-            # Username sin letras
             auth.register_user("12345", "ValidPassword123-", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -96,7 +85,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_password_short(self):
         """Test: Registro con contraseña muy corta"""
         with patch('auth.type_text') as mock_type_text:
-            # Password demasiado corta
             auth.register_user("validuser", "Short1-", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -107,7 +95,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_password_no_uppercase(self):
         """Test: Registro con contraseña sin mayúsculas"""
         with patch('auth.type_text') as mock_type_text:
-            # Password sin mayúsculas
             auth.register_user("validuser", "invalidpass123-", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -118,7 +105,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_password_no_number(self):
         """Test: Registro con contraseña sin números"""
         with patch('auth.type_text') as mock_type_text:
-            # Password sin números
             auth.register_user("validuser", "InvalidPass-", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -129,7 +115,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_invalid_password_no_symbol(self):
         """Test: Registro con contraseña sin símbolos"""
         with patch('auth.type_text') as mock_type_text:
-            # Password sin símbolos
             auth.register_user("validuser", "InvalidPass123", self.mock_terminal)
             
             mock_type_text.assert_called_with(
@@ -145,7 +130,6 @@ class TestAuthFunctions(unittest.TestCase):
     def test_register_user_success(self, mock_load_data, mock_store_data, mock_hash_password, 
                                 mock_generate_key, mock_store_encrypted):
         """Test: Registro exitoso"""
-        # Configurar datos de prueba realistas
         valid_salt_password = b"16_bytes_salt!!"
         valid_salt_key = b"16_bytes_key_salt"
         valid_hash = b"32_bytes_hash_1234567890123456"
@@ -154,12 +138,11 @@ class TestAuthFunctions(unittest.TestCase):
         valid_salt_key_b64 = base64.b64encode(valid_salt_key).decode('ascii')
         valid_hash_b64 = base64.b64encode(valid_hash).decode('ascii')
         
-        # Mock load_data para diferentes archivos
         def load_data_side_effect(path):
             if path == auth.USERS_PATH:
-                return {}  # No hay usuarios existentes
+                return {}  
             else:
-                return {}  # Archivo de datos del usuario vacío
+                return {}  
         
         mock_load_data.side_effect = load_data_side_effect
         mock_hash_password.return_value = (
@@ -173,7 +156,6 @@ class TestAuthFunctions(unittest.TestCase):
             # Ejecutar registro
             auth.register_user("validuser", "ValidPassword123-", self.mock_terminal)
             
-            # Verificar que se guardó el usuario
             mock_store_data.assert_called_once()
             call_args = mock_store_data.call_args[0]
             saved_users = call_args[0]  # Primer argumento: datos a guardar
@@ -185,16 +167,13 @@ class TestAuthFunctions(unittest.TestCase):
             self.assertEqual(user_data["salt_key"], valid_salt_key_b64)
             self.assertEqual(user_data["hash"], valid_hash_b64)
             
-            # Verificar que se encriptaron los datos del usuario
             mock_store_encrypted.assert_called_once()
             
-            # Verificar que se generó la clave correctamente
             mock_generate_key.assert_called_once_with(
                 "ValidPassword123-", 
-                valid_salt_key  # Esto es base64.b64decode(valid_salt_key_b64)
+                valid_salt_key  
             )
             
-            # Verificar mensaje de éxito
             self.assertTrue(mock_type_text.called)
 
     # Tests para login_user
@@ -223,7 +202,6 @@ class TestAuthFunctions(unittest.TestCase):
     @patch('auth.hash_password')
     def test_login_user_success(self, mock_hash_password, mock_generate_key, mock_show_menu):
         """Test: Login exitoso"""
-        # Crear usuario en archivo
         user_data = {
             "salt_password": base64.b64encode(b"fake_salt_16_bytes").decode('ascii'),
             "salt_key": base64.b64encode(b"fake_salt_key_16_bytes").decode('ascii'),
@@ -233,23 +211,19 @@ class TestAuthFunctions(unittest.TestCase):
         with open(self.test_users_path, 'w') as f:
             json.dump({"testuser": user_data}, f)
         
-        # Configurar mocks
         mock_hash_password.return_value = (None, None, user_data["hash"])
         mock_generate_key.return_value = b"fake_user_key_32_bytes_123456"
         
         with patch('auth.type_text') as mock_type_text:
             auth.login_user("testuser", "ValidPassword123-", self.mock_terminal, self.mock_root)
             
-            # Verificar que se destruyó la ventana de login
             self.mock_root.destroy.assert_called_once()
             
-            # Verificar que se mostró el menú secundario
             mock_show_menu.assert_called_once()
 
     @patch('auth.hash_password')
     def test_login_user_wrong_password(self, mock_hash_password):
         """Test: Login con contraseña incorrecta"""
-        # Crear usuario en archivo
         user_data = {
             "salt_password": base64.b64encode(b"fake_salt_16_bytes").decode('ascii'),
             "salt_key": base64.b64encode(b"fake_salt_key_16_bytes").decode('ascii'),
@@ -259,13 +233,11 @@ class TestAuthFunctions(unittest.TestCase):
         with open(self.test_users_path, 'w') as f:
             json.dump({"testuser": user_data}, f)
         
-        # Configurar mock para que retorne hash diferente
         mock_hash_password.return_value = (None, None, "different_hash_b64")
         
         with patch('auth.type_text') as mock_type_text:
             auth.login_user("testuser", "WrongPassword123-", self.mock_terminal, self.mock_root)
             
-            # Verificar mensaje de error
             mock_type_text.assert_called()
             call_args = mock_type_text.call_args[0][1]
             self.assertIn("Los hashes no coinciden", call_args)

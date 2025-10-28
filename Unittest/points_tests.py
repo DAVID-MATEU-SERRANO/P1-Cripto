@@ -11,14 +11,11 @@ class TestPointsFunctions(unittest.TestCase):
 
     def setUp(self):
         """Configuración antes de cada test"""
-        # Mock del terminal
         self.mock_terminal = Mock()
         self.mock_terminal.delete = Mock()
         
-        # Mock de user_key
         self.mock_user_key = b"fake_user_key_32_bytes_123456789"
         
-        # Datos de usuario de prueba
         self.sample_user_data = {
             "username": "testuser",
             "garage": [
@@ -44,10 +41,8 @@ class TestPointsFunctions(unittest.TestCase):
         
         points.type_points("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Verificar que se cargaron los datos
         mock_load_data.assert_called_once_with("fake_path", self.mock_user_key, self.mock_terminal)
         
-        # Verificar que se mostraron los puntos
         mock_type_text.assert_called_once_with(
             self.mock_terminal, 
             "->Actualmente tienes un total de 100000 puntos<-"
@@ -75,11 +70,10 @@ class TestPointsFunctions(unittest.TestCase):
     @patch('points.load_encrypted_data')
     def test_type_points_load_data_fails(self, mock_load_data, mock_type_text):
         """Test: Fallo al cargar datos encriptados"""
-        mock_load_data.return_value = None  # Simular fallo
+        mock_load_data.return_value = None  
         
         points.type_points("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # No debería llamar a type_text si load_encrypted_data falla
         mock_type_text.assert_not_called()
 
 
@@ -92,7 +86,6 @@ class TestPointsFunctions(unittest.TestCase):
         
         points.type_points("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Debería manejar datos vacíos sin crashear
 
     @patch('points.type_text')
     @patch('points.load_encrypted_data')

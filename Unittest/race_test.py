@@ -15,25 +15,20 @@ class TestRaceFunctions(unittest.TestCase):
 
     def setUp(self):
         """Configuración antes de cada test"""
-        # Crear directorio temporal para pruebas
         self.test_dir = tempfile.mkdtemp()
         self.test_races_path = os.path.join(self.test_dir, "races")
         self.test_users_path = os.path.join(self.test_dir, "users.json")
         os.makedirs(self.test_races_path, exist_ok=True)
         
-        # Configurar paths de prueba
         race.RACES_PATH = self.test_races_path + "/"
         race.USERS_PATH = self.test_users_path
         
-        # Mock del terminal
         self.mock_terminal = Mock()
         self.mock_terminal.delete = Mock()
         
-        # Mocks de claves
         self.mock_user_key = b"fake_user_key_32_bytes_123456789"
         self.mock_msg_key = b"fake_msg_key_32_bytes_1234567890"
         
-        # Datos de prueba
         self.sample_user_data = {
             "username": "testuser",
             "garage": [
@@ -67,7 +62,6 @@ class TestRaceFunctions(unittest.TestCase):
             "upgrades": []
         }
         
-        # Crear archivo de usuarios de prueba
         with open(self.test_users_path, 'w') as f:
             json.dump({
                 "rival_user": {"salt_password": "test", "salt_key": "test", "hash": "test"},
@@ -112,7 +106,6 @@ class TestRaceFunctions(unittest.TestCase):
         
         race.create_race("rival_user", self.sample_race_car, "testuser", self.mock_terminal, self.mock_msg_key)
         
-        # Verificar que se añadió a la lista existente
         saved_races = mock_store_data.call_args[0][0]
         self.assertEqual(len(saved_races), 2)
         self.assertEqual(saved_races[1]["rival"], "testuser")
@@ -221,7 +214,6 @@ class TestRaceFunctions(unittest.TestCase):
     @patch('race.type_text')
     def test_type_race_with_upgrades(self, mock_type_text, mock_load_data, mock_desencrypt):
         """Test: Visualización de carrera con mejoras"""
-        # Crear datos base64 VÁLIDOS para race_car
         valid_base64_data = base64.b64encode(b"fake_encrypted_data_16_bytes").decode('ascii')
         
         race_data = [{"rival": "opponent", "race_car": valid_base64_data}]
@@ -268,34 +260,32 @@ class TestRaceFunctions(unittest.TestCase):
             "La clave de descifrado debe tener 32 caracteres y debe ser la misma que la de cifrado\n"
         )
 
-@patch('race.load_data')
-@patch('race.load_encrypted_data')
-@patch('race.car_exists')
-@patch('race.type_text')
-def test_race_car_not_exists(self, mock_type_text, mock_car_exists, mock_load_encrypted, mock_load_data):
-    """Test: Ejecución de carrera con coche inexistente"""
-    # Mock de datos de carrera válidos
-    valid_base64_data = base64.b64encode(b"fake_encrypted_car_data_16b").decode('ascii')
-    race_data = [{"rival": "opponent", "race_car": valid_base64_data}]
-    
-    mock_load_data.return_value = race_data
-    mock_load_encrypted.return_value = self.sample_user_data
-    mock_car_exists.return_value = (False, 0)
-    
-    # También necesitamos mockear desencrypt_data
-    with patch('race.desencrypt_data') as mock_desencrypt:
-        mock_desencrypt.return_value = {
-            "brand": "Nissan", "model": "Skyline",
-            "stats": {"speed": 70, "handling": 60, "acceleration": 65, "braking": 55},
-            "upgrades": []
-        }
+    @patch('race.load_data')
+    @patch('race.load_encrypted_data')
+    @patch('race.car_exists')
+    @patch('race.type_text')
+    def test_race_car_not_exists(self, mock_type_text, mock_car_exists, mock_load_encrypted, mock_load_data):
+        """Test: Ejecución de carrera con coche inexistente"""
+        valid_base64_data = base64.b64encode(b"fake_encrypted_car_data_16b").decode('ascii')
+        race_data = [{"rival": "opponent", "race_car": valid_base64_data}]
         
-        race.race("testuser", "path", self.mock_user_key, self.mock_terminal, "NonexistentCar", self.mock_msg_key)
+        mock_load_data.return_value = race_data
+        mock_load_encrypted.return_value = self.sample_user_data
+        mock_car_exists.return_value = (False, 0)
         
-        mock_type_text.assert_called_with(
-            self.mock_terminal,
-            "No tienes este coche\nConsulta tu garage y elige uno\n"
-        )
+        with patch('race.desencrypt_data') as mock_desencrypt:
+            mock_desencrypt.return_value = {
+                "brand": "Nissan", "model": "Skyline",
+                "stats": {"speed": 70, "handling": 60, "acceleration": 65, "braking": 55},
+                "upgrades": []
+            }
+            
+            race.race("testuser", "path", self.mock_user_key, self.mock_terminal, "NonexistentCar", self.mock_msg_key)
+            
+            mock_type_text.assert_called_with(
+                self.mock_terminal,
+                "No tienes este coche\nConsulta tu garage y elige uno\n"
+            )
 
     @patch('random.randint')
     @patch('race.store_encrypted_data')
@@ -312,25 +302,22 @@ def test_race_car_not_exists(self, mock_type_text, mock_car_exists, mock_load_en
         mock_car_exists.return_value = (True, 0)
         mock_load_encrypted.return_value = self.sample_user_data
         
-        # Oponente con menos puntos
         opponent_car = {
             "brand": "Nissan", "model": "Skyline",
-            "stats": {"speed": 70, "handling": 60, "acceleration": 65, "braking": 55},  # Total: 250
+            "stats": {"speed": 70, "handling": 60, "acceleration": 65, "braking": 55},  
             "upgrades": []
         }
         
         mock_desencrypt.return_value = opponent_car
         mock_load_data.return_value = [{"rival": "opponent", "race_car": "data"}]
-        mock_randint.return_value = 5  # Sin adelantamiento sorpresa
+        mock_randint.return_value = 5  
         
         race.selected_race = 0
         race.race("testuser", "path", self.mock_user_key, self.mock_terminal, "Supra", self.mock_msg_key)
         
-        # Verificar que se actualizaron los puntos (+200)
         updated_user_data = mock_store_encrypted.call_args[0][0]
         self.assertEqual(updated_user_data["points"], 100000 + 200)
         
-        # Verificar que se eliminó la carrera - CORREGIDO
         from unittest.mock import ANY
         mock_store_data.assert_called_once_with([], ANY)
 
@@ -348,26 +335,23 @@ def test_race_car_not_exists(self, mock_type_text, mock_car_exists, mock_load_en
         """Test: Usuario pierde la carrera"""
         mock_car_exists.return_value = (True, 0)
         
-        # Usuario con menos puntos
         user_data_losing = self.sample_user_data.copy()
         user_data_losing["points"] = 100000
         mock_load_encrypted.return_value = user_data_losing
         
-        # Oponente con más puntos
         opponent_car = {
             "brand": "Nissan", "model": "Skyline",
-            "stats": {"speed": 90, "handling": 80, "acceleration": 85, "braking": 75},  # Total: 330
+            "stats": {"speed": 90, "handling": 80, "acceleration": 85, "braking": 75},  
             "upgrades": []
         }
         
         mock_desencrypt.return_value = opponent_car
         mock_load_data.return_value = [{"rival": "opponent", "race_car": "data"}]
-        mock_randint.return_value = 5  # Sin adelantamiento sorpresa
+        mock_randint.return_value = 5 
         
         race.selected_race = 0
         race.race("testuser", "path", self.mock_user_key, self.mock_terminal, "Supra", self.mock_msg_key)
         
-        # Verificar que se actualizaron los puntos (-200)
         updated_user_data = mock_store_encrypted.call_args[0][0]
         self.assertEqual(updated_user_data["points"], 100000 - 200)
 

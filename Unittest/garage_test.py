@@ -12,14 +12,11 @@ class TestGarageFunctions(unittest.TestCase):
 
     def setUp(self):
         """Configuración antes de cada test"""
-        # Mock del terminal
         self.mock_terminal = Mock()
         self.mock_terminal.delete = Mock()
         
-        # Mock de user_key
         self.mock_user_key = b"fake_user_key_32_bytes_123456789"
         
-        # Datos de usuario de prueba
         self.sample_user_data = {
             "username": "testuser",
             "garage": [
@@ -65,11 +62,10 @@ class TestGarageFunctions(unittest.TestCase):
             "points": 100000
         }
         
-        # Resetear variable global antes de cada test
         garage.selected_garage_car = 0
 
     def tearDown(self):
-        """Limpieza después de cada test"""
+        #Limpieza después de cada test
         garage.selected_garage_car = 0
 
     @patch('garage.type_text')
@@ -80,17 +76,13 @@ class TestGarageFunctions(unittest.TestCase):
         
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Verificar que se limpió el terminal
         self.mock_terminal.delete.assert_called_with("1.0", tk.END)
         
-        # Verificar que se cargaron los datos
         mock_load_data.assert_called_once_with("fake_path", self.mock_user_key, self.mock_terminal)
         
-        # Verificar que se mostró el coche
         mock_type_text.assert_called_once()
         call_args = mock_type_text.call_args[0][1]
         
-        # Verificar contenido del mensaje
         self.assertIn("Toyota Supra", call_args)
         self.assertIn("Velocidad: 80", call_args)
         self.assertIn("Manejo: 70", call_args)
@@ -120,7 +112,6 @@ class TestGarageFunctions(unittest.TestCase):
         """Test: Coche sin mejoras"""
         mock_load_data.return_value = self.sample_user_data
         
-        # Cambiar al segundo coche (Nissan Skyline sin mejoras)
         garage.selected_garage_car = 1
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
@@ -133,11 +124,10 @@ class TestGarageFunctions(unittest.TestCase):
     @patch('garage.load_encrypted_data')
     def test_type_garage_car_load_data_fails(self, mock_load_data, mock_type_text):
         """Test: Fallo al cargar datos encriptados"""
-        mock_load_data.return_value = None  # Simular fallo
+        mock_load_data.return_value = None  
         
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # No debería llamar a type_text si load_encrypted_data falla
         mock_type_text.assert_not_called()
 
     @patch('garage.type_text')
@@ -146,11 +136,9 @@ class TestGarageFunctions(unittest.TestCase):
         """Test: Navegación en límite superior del índice"""
         mock_load_data.return_value = self.sample_user_data
         
-        # Establecer índice al final
-        garage.selected_garage_car = 3  # Más allá del último índice
+        garage.selected_garage_car = 3 
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Debería resetear a 0
         self.assertEqual(garage.selected_garage_car, 0)
         mock_type_text.assert_called_once()
 
@@ -160,11 +148,9 @@ class TestGarageFunctions(unittest.TestCase):
         """Test: Navegación en límite inferior del índice"""
         mock_load_data.return_value = self.sample_user_data
         
-        # Establecer índice negativo
         garage.selected_garage_car = -1
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Debería ir al último coche
         self.assertEqual(garage.selected_garage_car, len(self.sample_user_data["garage"]) - 1)
         mock_type_text.assert_called_once()
 
@@ -175,9 +161,7 @@ class TestGarageFunctions(unittest.TestCase):
         
         garage.next_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Verificar que se incrementó el índice
         self.assertEqual(garage.selected_garage_car, initial_position + 1)
-        # Verificar que se llamó a type_garage_car
         mock_type_garage.assert_called_once_with("fake_path", self.mock_terminal, self.mock_user_key)
 
     @patch('garage.type_garage_car')
@@ -187,26 +171,21 @@ class TestGarageFunctions(unittest.TestCase):
         
         garage.previous_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Verificar que se decrementó el índice
         self.assertEqual(garage.selected_garage_car, initial_position - 1)
-        # Verificar que se llamó a type_garage_car
         mock_type_garage.assert_called_once_with("fake_path", self.mock_terminal, self.mock_user_key)
 
     @patch('garage.type_garage_car')
     def test_navigation_sequence(self, mock_type_garage):
         """Test: Secuencia completa de navegación"""
-        # Navegar hacia adelante varias veces
         garage.next_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         self.assertEqual(garage.selected_garage_car, 1)
         
         garage.next_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         self.assertEqual(garage.selected_garage_car, 2)
         
-        # Navegar hacia atrás
         garage.previous_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         self.assertEqual(garage.selected_garage_car, 1)
         
-        # Verificar que se llamó a type_garage_car cada vez
         self.assertEqual(mock_type_garage.call_count, 3)
 
     @patch('garage.type_text')
@@ -217,7 +196,6 @@ class TestGarageFunctions(unittest.TestCase):
         
         garage.type_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # Verificar el formato completo del mensaje
         mock_type_text.assert_called_once()
         call_args = mock_type_text.call_args[0][1]
         
@@ -271,31 +249,23 @@ class TestGarageFunctions(unittest.TestCase):
         """Test: Navegación que da la vuelta a la lista"""
         mock_load_data.return_value = self.sample_user_data
         
-        # Test 1: Del último al primero (wrap around forward)
-        garage.selected_garage_car = 2  # Último coche
+        garage.selected_garage_car = 2  
         
-        # next_garage_car incrementa a 3 y llama a type_garage_car
         garage.next_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # type_garage_car corrige 3 a 0 (porque 3 == len(garage) que es 3)
         self.assertEqual(garage.selected_garage_car, 0)
         
-        # Verificar que se mostró el primer coche
         mock_type_text.assert_called_once()
         call_args = mock_type_text.call_args[0][1]
         self.assertIn("Toyota Supra", call_args)
         
-        # Test 2: Del primero al último (wrap around backward)
         mock_type_text.reset_mock()
-        garage.selected_garage_car = 0  # Primer coche
+        garage.selected_garage_car = 0  
         
-        # previous_garage_car decrementa a -1 y llama a type_garage_car
         garage.previous_garage_car("fake_path", self.mock_terminal, self.mock_user_key)
         
-        # type_garage_car corrige -1 a 2 (último coche)
         self.assertEqual(garage.selected_garage_car, 2)
         
-        # Verificar que se mostró el último coche
         mock_type_text.assert_called_once()
         call_args = mock_type_text.call_args[0][1]
         self.assertIn("Honda Civic", call_args)
@@ -316,7 +286,7 @@ class TestGarageFunctions(unittest.TestCase):
                         "acceleration": 82,
                         "braking": 75
                     },
-                    "upgrades": []  # Lista vacía explícita
+                    "upgrades": []  
                 }
             ],
             "points": 75000

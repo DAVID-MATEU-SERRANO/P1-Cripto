@@ -27,7 +27,6 @@ class TestUtilityFunctions(unittest.TestCase):
         """Limpieza después de cada test"""
         import shutil
         shutil.rmtree(self.test_dir)
-        # Resetear variables globales
         uf.typing_after_id = None
         uf.typing_queue.clear()
 
@@ -39,7 +38,6 @@ class TestUtilityFunctions(unittest.TestCase):
         self.assertIsNotNone(salt_password)
         self.assertIsNotNone(salt_key)
         self.assertIsNotNone(hash_b64)
-        # Verificar que son strings base64 válidos
         self.assertEqual(len(base64.b64decode(salt_password)), 16)
         self.assertEqual(len(base64.b64decode(salt_key)), 16)
         self.assertEqual(len(base64.b64decode(hash_b64)), 32)
@@ -49,7 +47,6 @@ class TestUtilityFunctions(unittest.TestCase):
         provided_salt = b"provided_salt_16"
         salt_password, salt_key, hash_b64 = uf.hash_password("TestPassword123-", provided_salt)
         
-        # Verificar que usa el salt proporcionado
         decoded_salt = base64.b64decode(salt_password)
         self.assertEqual(decoded_salt, provided_salt)
 
@@ -61,7 +58,6 @@ class TestUtilityFunctions(unittest.TestCase):
         _, _, result1 = uf.hash_password(password, salt)
         _, _, result2 = uf.hash_password(password, salt)
         
-        # Deben ser idénticos
         self.assertEqual(result1, result2)
 
     # Tests para generate_user_key
@@ -70,7 +66,7 @@ class TestUtilityFunctions(unittest.TestCase):
         salt = b"test_salt_16_bytes"
         key = uf.generate_user_key("TestPassword123-", salt)
         
-        self.assertEqual(len(key), 32)  # AES-256 key
+        self.assertEqual(len(key), 32)  
 
     def test_generate_user_key_deterministic(self):
         """Test: generate_user_key es determinístico"""
@@ -88,15 +84,12 @@ class TestUtilityFunctions(unittest.TestCase):
         key = b"test_key_32_bytes_12345678901234"
         plaintext = b"Test plaintext message"
         
-        # Encriptar
         cipher, ciphertext, tag = uf.encrypt_data(key, plaintext)
         
-        # Verificar que se generaron componentes
         self.assertIsNotNone(cipher.nonce)
         self.assertIsNotNone(ciphertext)
         self.assertIsNotNone(tag)
         
-        # Desencriptar CORRECTAMENTE usando AES.new
         cipher2 = AES.new(key, AES.MODE_GCM, nonce=cipher.nonce)
         decrypted = cipher2.decrypt_and_verify(ciphertext, tag)
         
@@ -109,14 +102,11 @@ class TestUtilityFunctions(unittest.TestCase):
         test_data = {"test": "data", "number": 123}
         plaintext = json.dumps(test_data).encode('utf-8')
         
-        # Encriptar datos de prueba
         cipher = uf.encrypt_data(key, plaintext)
-        file_bytes = cipher[0].nonce + cipher[2] + cipher[1]  # nonce + tag + ciphertext
+        file_bytes = cipher[0].nonce + cipher[2] + cipher[1]  
         
-        # Desencriptar
         result = uf.desencrypt_data(file_bytes, key, self.mock_terminal)
         
-        # Verificar resultado
         self.assertEqual(result, test_data)
         self.assertTrue(mock_type_text.called)
 
